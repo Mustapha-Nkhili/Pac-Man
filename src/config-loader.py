@@ -9,16 +9,46 @@ DEFAULTS = {
   "pacgum": 42,
   "points_per_pacgum": 10,
   "points_per_super_pacgum": 50,
-  "points_per_ghost": 200
+  "points_per_ghost": 200,
+  "level": [{"width": 15, "height": 15},
+            {"width": 20, "height": 20},
+            {"width": 30, "height": 30},
+            {"width": 40, "height": 40},
+            {"width": 55, "height": 55},
+            {"width": 50, "height": 50},
+            {"width": 45, "height": 45},
+            {"width": 40, "height": 40},
+            {"width": 55, "height": 55},
+            {"width": 50, "height": 50},
+            ]
 }
 
 def remove_comments(text: str) -> str:
     cleaned_txt = []
     for line in text.splitlines():
         if not line.strip().startswith("#"):
-            cleaned_txt.append(line.strip())
+            cleaned_txt.append(line)
 
     return "\n".join(cleaned_txt)
+
+
+def is_valid_level_list(value: list) -> bool:
+    if not isinstance(value, list):
+        return False
+    if len(value) < 10:
+        return False
+
+    for item in value:
+        if not isinstance(item, dict):
+            return False
+        width, height = item.get("width"), item.get("height")
+        if not isinstance(width, int) or width <= 0:
+            return False
+        if not isinstance(height, int) or height <= 0:
+            return False
+
+    return True
+
 
 def load_config(config_path: str) -> dict:
     try:
@@ -56,6 +86,13 @@ def load_config(config_path: str) -> dict:
                 config[key] = value
             else:
                 print(f"Config Error: {key} must be a non-empty .json file, using default")
+                config[key] = default
+        elif key == "level":
+            if is_valid_level_list(value):
+                config[key] = value
+            else:
+                print(f"Config Error: must be a list of 10 items of "
+                      f"{{width, height}}, using default")
                 config[key] = default
 
     return config

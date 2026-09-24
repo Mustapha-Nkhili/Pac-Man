@@ -57,11 +57,16 @@ def load_config(config_path: str) -> dict:
         data = json.loads(raw)
     except (OSError, json.JSONDecodeError) as e:
         print(f"Config Error: {e}, using defaults")
-        data = {}
+        return DEFAULTS.copy()
 
     config = DEFAULTS.copy()
     for key, default in DEFAULTS.items():
-        value = data.get(key, default)
+        value = data.get(key)
+
+        if value is None:
+            print(f"{key} is missing, using default")
+            value = default
+
         if key in {"level_max_time", "lives", "pacgum"}:
             if isinstance(value, int) and value > 0:
                 config[key] = value
@@ -98,5 +103,5 @@ def load_config(config_path: str) -> dict:
     return config
 
 
-print(load_config("../config.json"))
+print(load_config("./config.json"))
 

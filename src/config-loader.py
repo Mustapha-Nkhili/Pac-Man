@@ -23,6 +23,7 @@ DEFAULTS = {
             ]
 }
 
+
 def remove_comments(text: str) -> str:
     """Strip comment lines from raw config text.
 
@@ -68,7 +69,7 @@ def is_valid_level_list(value: list) -> bool:
 
 
 def load_config(config_path: str) -> dict:
-    """Load and validate the config file, falling back to safe defaults 
+    """Load and validate the config file, falling back to safe defaults
     in any missing key or wrong value.
 
     Args:
@@ -101,7 +102,8 @@ def load_config(config_path: str) -> dict:
                 print(f"Config Error: {key} must be > 0, using default")
                 config[key] = default
 
-        elif key in {"points_per_pacgum", "points_per_super_pacgum", "points_per_ghost"}:
+        elif key in {"points_per_pacgum", "points_per_super_pacgum",
+                     "points_per_ghost"}:
             if isinstance(value, int) and value >= 0:
                 config[key] = value
             else:
@@ -117,18 +119,18 @@ def load_config(config_path: str) -> dict:
             if isinstance(value, str) and value and value.endswith(".json"):
                 config[key] = value
             else:
-                print(f"Config Error: {key} must be a non-empty .json file, using default")
+                print(f"Config Error: {key} must be a non-empty "
+                      ".json file, using default")
                 config[key] = default
         elif key == "level":
             if is_valid_level_list(value):
                 config[key] = value
             else:
-                print(f"Config Error: must be a list of 10 items of "
-                      f"{{width, height}}, using default")
+                print("Config Error: must be a list of 10 items of "
+                      "{width, height} dict, using default")
                 config[key] = default
 
     return config
 
 
 print(load_config("./config.json"))
-

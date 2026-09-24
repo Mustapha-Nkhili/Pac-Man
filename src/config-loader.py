@@ -131,6 +131,3 @@ def load_config(config_path: str) -> dict:
                 config[key] = default
 
     return config
-
-
-print(load_config("./config.json"))

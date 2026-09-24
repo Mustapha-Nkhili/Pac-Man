@@ -24,6 +24,14 @@ DEFAULTS = {
 }
 
 def remove_comments(text: str) -> str:
+    """Strip comment lines from raw config text.
+
+    Args:
+        text: the raw file content.
+
+    Returns:
+        The same text with comment lines removed.
+    """
     cleaned_txt = []
     for line in text.splitlines():
         if not line.strip().startswith("#"):
@@ -33,6 +41,15 @@ def remove_comments(text: str) -> str:
 
 
 def is_valid_level_list(value: list) -> bool:
+    """Check whether a value is a valid list of levels.
+
+    Args:
+        value: a list of {width, height} for each level.
+
+    Returns:
+        True if value satisfies level list requirements, False
+        otherwise.
+    """
     if not isinstance(value, list):
         return False
     if len(value) < 10:
@@ -51,6 +68,16 @@ def is_valid_level_list(value: list) -> bool:
 
 
 def load_config(config_path: str) -> dict:
+    """Load and validate the config file, falling back to safe defaults 
+    in any missing key or wrong value.
+
+    Args:
+        config_path: a path to the JSON config file.
+
+    Returns:
+        A dict containing every key in DEFAULTS, each holding
+        either its validated value from the file or its default.
+    """
     try:
         with open(config_path) as file:
             raw = remove_comments(file.read())

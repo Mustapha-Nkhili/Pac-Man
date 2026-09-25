@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 
 DEFAULTS = {
@@ -41,6 +42,19 @@ def remove_comments(text: str) -> str:
     return "\n".join(cleaned_txt)
 
 
+def is_valid_int(value: Any) -> bool:
+    """Check whether a value is an int, excluding bool
+    cause it a subtype of int
+
+    Args:
+        value: the value to check
+
+    Returns:
+        True if value is an int and not a bool, otherwise False
+    """
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def is_valid_level_list(value: list) -> bool:
     """Check whether a value is a valid list of levels.
 
@@ -60,9 +74,9 @@ def is_valid_level_list(value: list) -> bool:
         if not isinstance(item, dict):
             return False
         width, height = item.get("width"), item.get("height")
-        if not isinstance(width, int) or width <= 0:
+        if not is_valid_int(width) or width <= 0:
             return False
-        if not isinstance(height, int) or height <= 0:
+        if not is_valid_int(height) or height <= 0:
             return False
 
     return True
@@ -96,21 +110,23 @@ def load_config(config_path: str) -> dict:
             value = default
 
         if key in {"level_max_time", "lives", "pacgum"}:
-            if isinstance(value, int) and value > 0:
+            if is_valid_int(value) and value > 0:
                 config[key] = value
             else:
-                print(f"Config Error: {key} must be > 0, using default")
+                print(f"Config Error: {key} must be a number > 0, "
+                      "using default")
                 config[key] = default
 
         elif key in {"points_per_pacgum", "points_per_super_pacgum",
                      "points_per_ghost"}:
-            if isinstance(value, int) and value >= 0:
+            if is_valid_int(value) and value >= 0:
                 config[key] = value
             else:
-                print(f"Config Error: {key} must be >= 0, using default")
+                print(f"Config Error: {key} must be a number >= 0, "
+                      "using default")
                 config[key] = default
         elif key == "seed":
-            if isinstance(value, int):
+            if is_valid_int(value):
                 config[key] = value
             else:
                 print(f"Config Error: {key} must be a number, using default")

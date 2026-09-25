@@ -1,7 +1,6 @@
 import json
 from typing import Any
 
-
 DEFAULTS = {
   "highscore_filename": "highscores.json",
   "seed": 42,

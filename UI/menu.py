@@ -1,7 +1,6 @@
 import sys
 
 import pygame
-
 from mazegenerator import MazeGenerator
 
 pygame.init()

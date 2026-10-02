@@ -4,7 +4,7 @@ from itertools import cycle
 import pygame
 
 from src.config_loader import load_config
-from src.logic.maze import load_maze
+from src.logic.maze import load_maze, can_move
 
 GAME_STATE = 'main_menu'
 def Exit():
@@ -55,7 +55,7 @@ def main():
     pause_menu = []
     instruction = []
     game_over = []
-    pacman_logo = pygame.image.load("/home/maissam/Pictures/pc/Pac-Man.svg").convert_alpha()
+    pacman_logo = pygame.image.load("./img/Pac-Man-Logo-2-2736475491.webp").convert_alpha()
     pacman_back = pygame.image.load("img/pause_back.jpg").convert_alpha()
     scaled_logo = pygame.transform.scale(pacman_logo, (350, 90))
     scaled_back = pygame.transform.scale(pacman_back, (1280, 720))
@@ -160,8 +160,6 @@ def main():
     last_row = 0
     last_dir = 0
 
-    def can_move(maze_grid, row, col, direction):
-        return (not maze_grid[row][col] & direction)
 
     while running:
         for event in pygame.event.get():

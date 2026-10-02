@@ -1,4 +1,5 @@
-from .maze import can_move, UP, DOWN, LEFT, RIGHT
+from .maze import DOWN, LEFT, RIGHT, UP, can_move
+
 
 class Entity:
     def  __init__(self, x: int, y: int, direction: int, maze_grid: list[list[int]]) -> None:

@@ -4,7 +4,8 @@ from itertools import cycle
 import pygame
 
 from src.config_loader import load_config
-from src.logic.maze import load_maze, can_move
+from src.logic.maze import can_move, load_maze
+from src.logic.entities import Ghost
 
 GAME_STATE = 'main_menu'
 def Exit():
@@ -159,7 +160,7 @@ def main():
     last_col = 0
     last_row = 0
     last_dir = 0
-
+    ghost = Ghost(x=5,y=5, direction=2, state="test", maze_grid=maze["maze"])
 
     while running:
         for event in pygame.event.get():
@@ -172,6 +173,7 @@ def main():
             for object in main_menu:
                 object.process()
         if GAME_STATE == "playing":
+            
             dt = clock.tick(60) / 1000
             time -= dt
             time = max(time, 0)
@@ -208,6 +210,9 @@ def main():
             key_input = pygame.key.get_pressed()
             pac_screen_x = (pac_col * cell_size) + (delta_x / 2)
             pac_screen_y = (pac_row * cell_size) + (delta_y / 2)
+            ghost_screen_x = (ghost.x * cell_size) + (delta_x / 2) + cell_size / 2
+            ghost_screen_y = (ghost.y * cell_size) + (delta_y / 2) + cell_size / 2
+            pygame.draw.circle(SCREEN, "red",(ghost_screen_x,ghost_screen_y), 6)
             movment = {pygame.K_UP: (1, -1, 0),
             pygame.K_DOWN: (4, 1, 0),
             pygame.K_LEFT: (8, 0, -1),

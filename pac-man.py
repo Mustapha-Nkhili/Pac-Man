@@ -4,7 +4,8 @@ from itertools import cycle
 import pygame
 
 from src.config_loader import load_config
-from src.logic.maze import load_maze
+from src.logic.maze import can_move, load_maze
+from src.logic.entities import Ghost
 
 GAME_STATE = 'main_menu'
 def Exit():
@@ -55,7 +56,7 @@ def main():
     pause_menu = []
     instruction = []
     game_over = []
-    pacman_logo = pygame.image.load("/home/maissam/Pictures/pc/Pac-Man.svg").convert_alpha()
+    pacman_logo = pygame.image.load("./img/Pac-Man-Logo-2-2736475491.webp").convert_alpha()
     pacman_back = pygame.image.load("img/pause_back.jpg").convert_alpha()
     scaled_logo = pygame.transform.scale(pacman_logo, (350, 90))
     scaled_back = pygame.transform.scale(pacman_back, (1280, 720))
@@ -159,9 +160,7 @@ def main():
     last_col = 0
     last_row = 0
     last_dir = 0
-
-    def can_move(maze_grid, row, col, direction):
-        return (not maze_grid[row][col] & direction)
+    ghost = Ghost(x=5,y=5, direction=2, state="test", maze_grid=maze["maze"])
 
     while running:
         for event in pygame.event.get():
@@ -210,6 +209,9 @@ def main():
             key_input = pygame.key.get_pressed()
             pac_screen_x = (pac_col * cell_size) + (delta_x / 2)
             pac_screen_y = (pac_row * cell_size) + (delta_y / 2)
+            ghost_screen_x = (ghost.x * cell_size) + (delta_x / 2) + cell_size / 2
+            ghost_screen_y = (ghost.y * cell_size) + (delta_y / 2) + cell_size / 2
+            pygame.draw.circle(SCREEN, "red",(ghost_screen_x,ghost_screen_y), 6)
             movment = {pygame.K_UP: (1, -1, 0),
             pygame.K_DOWN: (4, 1, 0),
             pygame.K_LEFT: (8, 0, -1),

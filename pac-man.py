@@ -173,7 +173,6 @@ def main():
             for object in main_menu:
                 object.process()
         if GAME_STATE == "playing":
-            
             dt = clock.tick(60) / 1000
             time -= dt
             time = max(time, 0)

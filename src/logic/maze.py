@@ -1,6 +1,6 @@
 from mazegenerator import MazeGenerator
 
-UP, DOWN, LEFT, RIGHT = 1, 2, 4, 8
+UP, RIGHT, DOWN, LEFT = 1, 2, 4, 8
 
 def load_maze(width: int = 15, height: int = 15, seed: int = 0, perfect: bool = False):
     generator = MazeGenerator(size=(width, height), seed=seed, perfect=perfect)

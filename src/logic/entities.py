@@ -78,3 +78,8 @@ class Ghost(Entity):
                     came_from[(next_x, next_y)] = ((x, y), direction)
                     queue.append((next_x, next_y))
 
+    def take_turn(self, player_x: int, player_y: int) -> None:
+        direction = self._find_shortest_path(player_x, player_y)
+        if direction:
+            self.move(direction)
+

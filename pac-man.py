@@ -212,6 +212,8 @@ def main():
             ghost_screen_x = (ghost.x * cell_size) + (delta_x / 2) + cell_size / 2
             ghost_screen_y = (ghost.y * cell_size) + (delta_y / 2) + cell_size / 2
             pygame.draw.circle(SCREEN, "red",(ghost_screen_x,ghost_screen_y), 6)
+            while ghost.x != pac_col or ghost.y != pac_row:
+                ghost.take_turn(pac_col, pac_row)
             movment = {pygame.K_UP: (1, -1, 0),
             pygame.K_DOWN: (4, 1, 0),
             pygame.K_LEFT: (8, 0, -1),

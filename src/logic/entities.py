@@ -1,6 +1,13 @@
 from collections import deque
+from enum import Enum, auto
 
 from .maze import DOWN, LEFT, RIGHT, UP, can_move
+
+
+class GhostStates(Enum):
+    CHASE: auto()
+    SCARED: auto()
+    EATEN: auto()
 
 
 class Entity:

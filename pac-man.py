@@ -5,7 +5,7 @@ import pygame
 
 from src.config_loader import load_config
 from src.logic.maze import can_move, load_maze
-from src.logic.entities import Ghost
+from src.logic.entities import Ghost, GhostStates
 
 GAME_STATE = 'main_menu'
 def Exit():
@@ -160,7 +160,8 @@ def main():
     last_col = 0
     last_row = 0
     last_dir = 0
-    ghost = Ghost(x=5,y=5, direction=2, state="test", maze_grid=maze["maze"])
+    ghost = Ghost(x=5,y=5, direction=2, maze_grid=maze["maze"])
+    ghost.state = GhostStates.SCARED
 
     while running:
         for event in pygame.event.get():
@@ -212,8 +213,7 @@ def main():
             ghost_screen_x = (ghost.x * cell_size) + (delta_x / 2) + cell_size / 2
             ghost_screen_y = (ghost.y * cell_size) + (delta_y / 2) + cell_size / 2
             pygame.draw.circle(SCREEN, "red",(ghost_screen_x,ghost_screen_y), 6)
-            while ghost.x != pac_col or ghost.y != pac_row:
-                ghost.take_turn(pac_col, pac_row)
+            ghost.take_turn(pac_col, pac_row)
             movment = {pygame.K_UP: (1, -1, 0),
             pygame.K_DOWN: (4, 1, 0),
             pygame.K_LEFT: (8, 0, -1),

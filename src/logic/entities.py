@@ -5,9 +5,9 @@ from .maze import DOWN, LEFT, RIGHT, UP, can_move
 
 
 class GhostStates(Enum):
-    CHASE: auto()
-    SCARED: auto()
-    EATEN: auto()
+    CHASE = auto()
+    SCARED = auto()
+    EATEN = auto()
 
 
 class Entity:
@@ -36,10 +36,9 @@ class Ghost(Entity):
     def __init__(self, x: int,
                  y: int,
                  direction: int,
-                 state: str,
                  maze_grid: list[list[int]]) -> None:
         super().__init__(x, y, direction, maze_grid)
-        self.state = state
+        self.state = GhostStates.CHASE
 
 
     def _get_unvisited_neighbors(self, x: int, y: int, came_from: dict[tuple, tuple]) -> list[tuple[int, int, int]]:
@@ -85,8 +84,52 @@ class Ghost(Entity):
                     came_from[(next_x, next_y)] = ((x, y), direction)
                     queue.append((next_x, next_y))
 
+    def _get_neighbors(self) -> list[tuple[int, int, int]]:
+        x = self.x
+        y = self.y
+        neighbors = []
+        directions = [
+            (x, y - 1, UP),
+            (x + 1, y, RIGHT),
+            (x, y + 1, DOWN),
+            (x - 1, y, LEFT)
+        ]
+
+        for nx, ny, direction in directions:
+            if 0 <= nx < self.maze_width and 0 <= ny < self.maze_height:
+                if can_move(self.maze_grid, y, x, direction):
+                    neighbors.append((nx, ny, direction))
+
+        return neighbors
+
+
+    def _escape_player_direction(self, player_x, player_y) -> int | None:
+        OPPOSITE = {UP: DOWN, RIGHT: LEFT, DOWN: UP, LEFT: RIGHT}
+        neighbors = self._get_neighbors()
+        if not neighbors:
+            return None
+
+        reverse = OPPOSITE.get(self.direction)
+        forward_neighbors = [n for n in neighbors if n[2] != reverse]
+        neighbors = forward_neighbors if forward_neighbors else neighbors
+
+        best_direction = None
+        best_distance = -1
+        for nx, ny, direction in neighbors:
+            distance = abs(nx - player_x) + abs(ny - player_y)
+            if distance > best_distance:
+                best_distance = distance
+                best_direction = direction
+
+        return best_direction
+
     def take_turn(self, player_x: int, player_y: int) -> None:
-        direction = self._find_shortest_path(player_x, player_y)
-        if direction:
+        if self.state == GhostStates.CHASE:
+            direction = self._find_shortest_path(player_x, player_y)
+        elif self.state == GhostStates.SCARED:
+            direction = self._escape_player_direction(player_x, player_y)
+        else:
+            direction = None
+        if direction is not None:
             self.move(direction)
 

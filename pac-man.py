@@ -162,7 +162,7 @@ def main():
     last_dir = 0
     ghost = Ghost(x=5,y=5, direction=2, maze_grid=maze["maze"], corner=GhostCorners.BOTTOMLEFT)
     ghost.state = GhostStates.EATEN
-    # ghost.scared_until = ghost.scared_time + pygame.time.get_ticks()
+    # ghost.scared_until = ghost.scared_duration + pygame.time.get_ticks()
 
     while running:
         for event in pygame.event.get():

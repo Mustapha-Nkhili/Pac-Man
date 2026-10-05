@@ -47,7 +47,7 @@ class Ghost(Entity):
         super().__init__(x, y, direction, maze_grid)
         self.state = GhostStates.CHASE
         self.scared_until = 0
-        self.scared_time = 7000
+        self.scared_duration = 7000
         self.corner = corner
 
 
@@ -62,6 +62,8 @@ class Ghost(Entity):
             return (0, self.maze_height - 1)
         elif corner == GhostCorners.BOTTOMRIGHT:
             return (self.maze_width - 1, self.maze_height - 1)
+        else:
+            return (0, 0)
 
     def _get_unvisited_neighbors(self, x: int, y: int, came_from: dict[tuple, tuple]) -> list[tuple[int, int, int]]:
         neighbors = []
@@ -157,4 +159,7 @@ class Ghost(Entity):
             direction = None
         if direction is not None:
             self.move(direction)
+
+        if self.state == GhostStates.EATEN and (self.x, self.y) == self._get_corner():
+            self.state = GhostStates.CHASE
 

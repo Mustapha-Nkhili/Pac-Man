@@ -39,6 +39,8 @@ class Ghost(Entity):
                  maze_grid: list[list[int]]) -> None:
         super().__init__(x, y, direction, maze_grid)
         self.state = GhostStates.CHASE
+        self.scared_until = 0
+        self.scared_time = 7000
 
 
     def _get_unvisited_neighbors(self, x: int, y: int, came_from: dict[tuple, tuple]) -> list[tuple[int, int, int]]:

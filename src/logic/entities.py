@@ -9,6 +9,12 @@ class GhostStates(Enum):
     SCARED = auto()
     EATEN = auto()
 
+class GhostCorners(Enum):
+    TOPLEFT = auto()
+    TOPRIGHT = auto()
+    BOTTOMLEFT = auto()
+    BOTTOMRIGHT = auto()
+
 
 class Entity:
     def __init__(self, x: int, y: int, direction: int, maze_grid: list[list[int]]) -> None:
@@ -36,12 +42,26 @@ class Ghost(Entity):
     def __init__(self, x: int,
                  y: int,
                  direction: int,
-                 maze_grid: list[list[int]]) -> None:
+                 maze_grid: list[list[int]],
+                 corner: GhostCorners) -> None:
         super().__init__(x, y, direction, maze_grid)
         self.state = GhostStates.CHASE
         self.scared_until = 0
         self.scared_time = 7000
+        self.corner = corner
 
+
+    def _get_corner(self) -> tuple[int, int]:
+        corner = self.corner
+
+        if corner == GhostCorners.TOPLEFT:
+            return (0, 0)
+        elif corner == GhostCorners.TOPRIGHT:
+            return (self.maze_width - 1, 0)
+        elif corner == GhostCorners.BOTTOMLEFT:
+            return (0, self.maze_height - 1)
+        elif corner == GhostCorners.BOTTOMRIGHT:
+            return (self.maze_width - 1, self.maze_height - 1)
 
     def _get_unvisited_neighbors(self, x: int, y: int, came_from: dict[tuple, tuple]) -> list[tuple[int, int, int]]:
         neighbors = []
@@ -130,6 +150,9 @@ class Ghost(Entity):
             direction = self._find_shortest_path(player_x, player_y)
         elif self.state == GhostStates.SCARED:
             direction = self._escape_player_direction(player_x, player_y)
+        elif self.state == GhostStates.EATEN:
+            x, y = self._get_corner()
+            direction = self._find_shortest_path(x, y)
         else:
             direction = None
         if direction is not None:

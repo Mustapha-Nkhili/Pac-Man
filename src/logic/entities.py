@@ -163,3 +163,13 @@ class Ghost(Entity):
         if self.state == GhostStates.EATEN and (self.x, self.y) == self._get_corner():
             self.state = GhostStates.CHASE
 
+
+class Player(Entity):
+    def __init__(self, x: int, y: int, lives: int,
+                 direction: int,
+                 maze_grid: list[list[int]]) -> None:
+        super().__init__(x, y, direction, maze_grid)
+        self.score = 0
+        self.lives = lives
+        self.spawn_x = x
+        self.spawn_y = y

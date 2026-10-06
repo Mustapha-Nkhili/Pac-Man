@@ -154,10 +154,8 @@ def main():
         x=0, y=0, lives=config["lives"], direction=2, maze_grid=maze["maze"]
     )
     ghost = Ghost(
-        x=5, y=5, direction=2, maze_grid=maze["maze"], corner=GhostCorners.BOTTOMLEFT
+        direction=2, maze_grid=maze["maze"], corner=GhostCorners.BOTTOMLEFT
     )
-    ghost.state = GhostStates.EATEN
-    # ghost.scared_until = ghost.scared_duration + pygame.time.get_ticks()
     maze_grid = maze["maze"]
     cell_size = 20
     total_hight = len(maze_grid) * cell_size
@@ -196,7 +194,7 @@ def main():
         if GAME_STATE == "playing":
             gameplay_UI.update()
             gameplay_UI.draw()
-            game_state.check_collision(player, [ghost], config["points_per_ghost"])
+            game_state.check_collisions(player, [ghost], config["points_per_ghost"])
             for object in gameplay:
                 object.process()
             if player.lives <= 0:

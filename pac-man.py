@@ -2,10 +2,10 @@ import sys
 from itertools import cycle
 
 import pygame
-
+from src.logic.maze import DOWN, LEFT, RIGHT, UP
 from src.config_loader import load_config
 from src.logic.maze import can_move, load_maze
-from src.logic.entities import Ghost, GhostStates, GhostCorners
+from src.logic.entities import Ghost, GhostStates, GhostCorners, Player
 
 GAME_STATE = 'main_menu'
 def Exit():
@@ -148,18 +148,12 @@ def main():
     Button(380,340 , 230, 50, get_font, "Start again", game_over, Start)
     Button(380, 650, 230, 50, get_font, "main menu", game_over, menu)
 
-
-    pac_col = 0
-    pac_row = 0
-    speed = 1
     last_move = 0
+    ghost_last_move = 0
     delay = 90
-    lives = 3
+    ghost_delay = 250
     time = config["level_max_time"]
-    level = config["lives"]
-    last_col = 0
-    last_row = 0
-    last_dir = 0
+    player = Player(x=0, y=0, lives=config["lives"],direction=2,maze_grid=maze["maze"] )
     ghost = Ghost(x=5,y=5, direction=2, maze_grid=maze["maze"], corner=GhostCorners.BOTTOMLEFT)
     ghost.state = GhostStates.EATEN
     # ghost.scared_until = ghost.scared_duration + pygame.time.get_ticks()
@@ -197,50 +191,48 @@ def main():
                     screen_x = (x * cell_size) + (delta_x / 2)
                     screen_y = (y * cell_size) + (delta_y / 2)
                     if n & 1:
-                        # SCREEN.blit(s_top_wall, (screen_x,screen_y))
                         pygame.draw.line(SCREEN, "white", (screen_x,screen_y), (screen_x + cell_size, screen_y),1)
-                        
                     if n & 2:
                         pygame.draw.line(SCREEN, "white", (screen_x + cell_size,screen_y), (screen_x + cell_size, screen_y + cell_size),1)
                     if n & 4:
                         pygame.draw.line(SCREEN, "white", (screen_x,screen_y + cell_size), (screen_x + cell_size, screen_y + cell_size),1)
                     if n & 8:
-                        # SCREEN.blit(s_right_wall, (screen_x,screen_y))
                         pygame.draw.line(SCREEN, "white", (screen_x,screen_y), (screen_x, screen_y + cell_size),1)
             
             key_input = pygame.key.get_pressed()
-            pac_screen_x = (pac_col * cell_size) + (delta_x / 2)
-            pac_screen_y = (pac_row * cell_size) + (delta_y / 2)
+            pac_screen_x = (player.x * cell_size) + (delta_x / 2)
+            pac_screen_y = (player.y * cell_size) + (delta_y / 2)
             ghost_screen_x = (ghost.x * cell_size) + (delta_x / 2) + cell_size / 2
             ghost_screen_y = (ghost.y * cell_size) + (delta_y / 2) + cell_size / 2
             pygame.draw.circle(SCREEN, "red",(ghost_screen_x,ghost_screen_y), 6)
-            ghost.take_turn(pac_col, pac_row)
+            if curre_time - ghost_last_move >= ghost_delay:
+                ghost.take_turn(player.x, player.y)
+                ghost_last_move = curre_time
             # if GhostStates.SCARED == ghost.state and curre_time > ghost.scared_until:
             #     ghost.state = GhostStates.CHASE
-            movment = {pygame.K_UP: (1, -1, 0),
-            pygame.K_DOWN: (4, 1, 0),
-            pygame.K_LEFT: (8, 0, -1),
-            pygame.K_RIGHT: (2, 0, 1)}
-        
-            for k, v in movment.items():
-                direction, dx, dy, = v
-                if key_input[k] and can_move(maze_grid, pac_row, pac_col, direction) and curre_time - last_move >= delay:
-                    SCREEN.blit(current_image,(int(pac_screen_x), int(pac_screen_y)))
-                    pac_col += dy
-                    pac_row += dx
-                    last_col = dy
-                    last_row = dx
-                    last_dir = direction
-                    last_move = curre_time
-                    break
-            
-            if can_move(maze_grid, pac_row, pac_col, last_dir) and curre_time - last_move >= delay:
-                pac_col += last_col
-                pac_row += last_row
+            movment = {pygame.K_UP: UP,
+            pygame.K_DOWN: DOWN,
+            pygame.K_LEFT: LEFT,
+            pygame.K_RIGHT: RIGHT}
+            if curre_time - last_move >= delay:
+                moved = False
+                for k, v in movment.items():
+                    if key_input[k]:
+                        before = (player.x, player.y)
+                        player.move(v)
+                        if (player.x, player.y) != before:
+                            moved = True
+                            last_move = curre_time
+                        break
+                if not moved:
+                    before = (player.x, player.y)
+                    player.move(player.direction)
+                    if (player.x, player.y) != before:
+                        last_move = curre_time
                 last_move = curre_time
-                SCREEN.blit(current_image,(int(pac_screen_x), int(pac_screen_y)))
             SCREEN.blit(current_image,(int(pac_screen_x), int(pac_screen_y)))
-            lives_surf = get_font.render(f"lives: {lives}", True, (20,20,20))
+            # SCREEN.blit(current_image,(int(pac_screen_x), int(pac_screen_y)))
+            lives_surf = get_font.render(f"lives: {player.lives}", True, (20,20,20))
             time_surf = get_font.render(f"time_left: {time:.1f}", True, (20,20,20))
             level_surf = get_font.render("level", True, (20,20,20))
 

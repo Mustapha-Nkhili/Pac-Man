@@ -51,7 +51,6 @@ def main():
     maze = load_maze(
         config["level"][0]["width"], config["level"][0]["height"], config["seed"]
     )
-    print(maze["maze"])
 
     pygame.init()
     SCREEN = pygame.display.set_mode((1280, 720))
@@ -182,6 +181,15 @@ def main():
         movment,
     )
     game_state = GameState()
+    excluded = {(0, 0), (maze["width"] - 1, 0),
+                (0, maze["height"] - 1),
+                (maze["width"] - 1, maze["height"] - 1)}
+    pacgums = game_state.place_pacgums(maze["width"], 
+                                       maze["height"],
+                                       config["pacgum"],
+                                       excluded)
+
+    print(pacgums)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -151,7 +151,7 @@ def main():
 
     time = config["level_max_time"]
     player = Player(
-        x=10, y=10, lives=config["lives"], direction=2, maze_grid=maze["maze"]
+        x=0, y=0, lives=config["lives"], direction=2, maze_grid=maze["maze"]
     )
     ghost = Ghost(
         x=5, y=5, direction=2, maze_grid=maze["maze"], corner=GhostCorners.BOTTOMLEFT
@@ -196,7 +196,7 @@ def main():
         if GAME_STATE == "playing":
             gameplay_UI.update()
             gameplay_UI.draw()
-            game_state.check_collision(player, [ghost], config)
+            game_state.check_collision(player, [ghost], config["points_per_ghost"])
             for object in gameplay:
                 object.process()
             if player.lives <= 0:

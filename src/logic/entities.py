@@ -173,3 +173,6 @@ class Player(Entity):
         self.lives = lives
         self.spawn_x = x
         self.spawn_y = y
+
+    def respawn(self) -> None:
+        self.x, self.y = self.spawn_x, self.spawn_y

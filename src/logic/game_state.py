@@ -2,13 +2,7 @@ from .entities import Player, Ghost, GhostStates
 
 
 class GameState:
-    def _player_respawn(self, player: Player) -> None:
-        player.x = player.spawn_x
-        player.y = player.spawn_y
-
-    def check_collision(self, player: Player, ghosts: list[Ghost], config) -> None:
-        points_per_ghost = config["points_per_ghost"]
-
+    def check_collisions(self, player: Player, ghosts: list[Ghost], points_per_ghost: int) -> None:
         for ghost in ghosts:
             if (player.x, player.y) != (ghost.x, ghost.y):
                 continue
@@ -18,4 +12,4 @@ class GameState:
                 ghost.state = GhostStates.EATEN
             elif ghost.state == GhostStates.CHASE:
                 player.lives -= 1
-                self._player_respawn(player)
+                player.respawn()

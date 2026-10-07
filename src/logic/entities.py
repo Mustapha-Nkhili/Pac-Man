@@ -39,16 +39,17 @@ class Entity:
 
 
 class Ghost(Entity):
-    def __init__(self, x: int,
-                 y: int,
-                 direction: int,
+    def __init__(self, direction: int,
                  maze_grid: list[list[int]],
                  corner: GhostCorners) -> None:
+        self.maze_height = len(maze_grid)
+        self.maze_width = len(maze_grid[0])
+        self.corner = corner
+        x, y = self._get_corner()
         super().__init__(x, y, direction, maze_grid)
         self.state = GhostStates.CHASE
         self.scared_until = 0
         self.scared_duration = 7000
-        self.corner = corner
 
 
     def _get_corner(self) -> tuple[int, int]:
@@ -173,3 +174,6 @@ class Player(Entity):
         self.lives = lives
         self.spawn_x = x
         self.spawn_y = y
+
+    def respawn(self) -> None:
+        self.x, self.y = self.spawn_x, self.spawn_y

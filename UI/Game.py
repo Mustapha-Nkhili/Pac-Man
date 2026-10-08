@@ -5,6 +5,7 @@ import pygame
 from UI.menu import Menu
 
 from UI.Gameplay import Gameplay
+from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 
 WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/pixel-game/Pixel Game.otf"
@@ -108,7 +109,6 @@ class Game:
             events = pygame.event.get()
             if any(event.type == pygame.QUIT for event in events):
                 self.running = False
-            
             next_state = self.screens[self.state].update(events, dt)
             if next_state:
                 self.state = next_state

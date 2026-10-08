@@ -4,8 +4,7 @@ import pygame
 
 from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
-
-CELL_SIZE = 20
+CELL_SIZE = 40
 BACKGROUND = (51, 55, 150)
 PLAYER_DELAY = 90
 FRAME_PER_IMAGE = 8
@@ -34,7 +33,7 @@ class Gameplay:
         width, hieght = self.screen.get_size()
         self.offset_x = (width - len(self.maze_grid[0]) * CELL_SIZE) // 2
         self.offset_y = (hieght - len(self.maze_grid) * CELL_SIZE) // 2
-        self.player = Player(x=0, y=0, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
+        self.player = Player(x=2, y=2, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
         self.ghost = Ghost(x= 5, y =5, direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
         self.ghost.state = GhostStates.EATEN
         self.ghost_last_move = 0
@@ -52,6 +51,12 @@ class Gameplay:
         self.time_left = max(self.time_left - dt, 0)
         if self.time_left == 0:
             return "game_over"
+        if self.player.lives <= 0:
+            return "game_over"
+        elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
+            self.player.lives -= 1
+            self.player.x = 5 
+            self.player.y = 5
         self.animate()
         now = pygame.time.get_ticks()
         if now - self.ghost_last_move >= GHOST_DELAY:
@@ -86,6 +91,8 @@ class Gameplay:
         self.draw_ghost()
         self.draw_player()
         self.draw_hud()
+        self.draw_pacgums()
+        # self.death()
         for button in self.buttons:
             button.draw()
     def draw_maze(self):
@@ -108,6 +115,15 @@ class Gameplay:
     def draw_ghost(self):
         center = self.center_cell(self.ghost.x, self.ghost.y)
         pygame.draw.circle(self.screen, "red", center, 6)
+    def draw_pacgums(self):
+        for i in range(self.config["pacgum"]):
+            for y, n in enumerate(self.maze_grid):
+                for x, cell in enumerate(n):
+                    center = self.center_cell(x, y)
+                    # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
+                    if cell <= 14 and self.player.x != x and self.player.y != y:
+                        pygame.draw.circle(self.screen, "black", center,4)
+
     def draw_hud(self):
         lines = [
             f"Lives: {self.player.lives}",

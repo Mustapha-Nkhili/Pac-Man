@@ -65,6 +65,8 @@ class Gameplay:
             self.player.y = 5
         self.animate()
         self.eat_pacgum()
+        self.eat_super_pacgum()
+        self.cheat_mode()
         now = pygame.time.get_ticks()
         if now - self.ghost_last_move >= GHOST_DELAY:
             self.ghost.take_turn(self.player.x, self.player.y)
@@ -77,10 +79,19 @@ class Gameplay:
             print(x, y)
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "red", center, 4)
+            print(self.excluded)
+    def draw_super_pacgums(self):
+        for x, y in self.excluded:
+            center = self.center_cell(x, y)
+            pygame.draw.circle(self.screen, "black", center, 10)
+
     def eat_pacgum(self):
             if (self.player.x, self.player.y) in self.pacgums:
                 self.pacgums.remove((self.player.x,self.player.y))
                 self.player.score += self.config["points_per_pacgum"]
+    def eat_super_pacgum(self):
+        if (self.player.x, self.player.y) in self.excluded:
+            self.ghost.state = GhostStates.SCARED
     def animate(self):
         self.frame_counter += 1
         if self.frame_counter >= FRAME_PER_IMAGE:
@@ -108,10 +119,15 @@ class Gameplay:
         self.draw_player()
         self.draw_hud()
         self.draw_pacgums()
+        self.draw_super_pacgums()
         # self.draw_pacgums()
         # self.death()
         for button in self.buttons:
             button.draw()
+    def cheat_mode(self):
+        key = pygame.key.get_pressed()
+        if key == pygame.K_0:
+            print("waaaa")
     def draw_maze(self):
          for y, n in enumerate(self.maze_grid):
              for x, cell in enumerate(n):

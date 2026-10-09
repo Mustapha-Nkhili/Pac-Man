@@ -53,8 +53,6 @@ class Game:
         self.game_state = game_state
         self.load_assets()
         self.load_screens()
-        
-        # self.draw_pacgums()
     @staticmethod
     def images(path, size=None):
         image = pygame.image.load(path).convert_alpha()

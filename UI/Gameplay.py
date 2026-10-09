@@ -42,8 +42,6 @@ class Gameplay:
         self.frame_counter = 0
         self.pac_animation = cycle(self.pac_images)
         self.current_image = next(self.pac_animation)
-        # self.maze = load_maze(self.config["level"][1]["width"], self.config["level"][1]["height"],
-        #                  self.config["seed"])
         self.excluded = {(0, 0), (maze["width"] - 1, 0),
                 (0, maze["height"] - 1),
                 (maze["width"] - 1, maze["height"] - 1)}
@@ -51,15 +49,6 @@ class Gameplay:
                                        maze["height"],
                                        self.config["pacgum"],
                                        self.excluded)
-        
-        # for y, n in enumerate(self.maze_grid):
-        #     for x, cell in enumerate(n):
-        #         center = self.center_cell(x, y)
-        #         # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
-        #         if cell <= 14 and (self.player.x != x or self.player.y != y):
-        #             pygame.draw.circle(self.screen, "black", center,4)
-
-
     def update(self, events, dt):
         for event in events:
             for button in self.buttons:
@@ -143,13 +132,6 @@ class Gameplay:
     def draw_ghost(self):
         center = self.center_cell(self.ghost.x, self.ghost.y)
         pygame.draw.circle(self.screen, "red", center, 6)
-    # def draw_pacgums(self):
-    #     for y, n in enumerate(self.maze_grid):
-    #         for x, cell in enumerate(n):
-    #             center = self.center_cell(x, y)
-    #             # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
-    #             if cell <= 14 and (self.player.x != x and self.player.y != y):
-    #                 pygame.draw.circle(self.screen, "black", center,4)
 
     def draw_hud(self):
         lines = [

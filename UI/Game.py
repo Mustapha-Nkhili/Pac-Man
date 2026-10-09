@@ -61,6 +61,7 @@ class Game:
         self.menu_bg = self.images("img/pause_back.jpg", window)
         self.pause_bg = self.images("img/pause.png", window)
         self.pause_bg2 = self.images("img/pause_back2.jpg", window)
+        self.instructions = self.images("img/Instructions.png", window)
         self.pac_images = [self.images(f"img/{name}", (14, 14))
                            for name in 
                            ("pacmanopen.png",
@@ -84,7 +85,7 @@ class Game:
                 Button(screen, 540, 460, 200, 50, font, "Quit Game", self.quit),
                 Button(screen, 390, 360, 200, 50, font, "main_menu", switch("main_menu")),
             ], images=[(self.pause_bg, (400, 190))]),
-            "instructions": Menu(screen, font, "white", [
+            "instructions": Menu(screen, font, self.instructions, [
                 Button(screen, 550, 650, 200, 50, font, "main_menu", switch("main_menu")),
             ]),
             "game_over": Menu(screen, font, "black", [

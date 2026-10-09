@@ -16,15 +16,16 @@ class Gameplay:
         pygame.K_LEFT: LEFT,
         pygame.K_RIGHT: RIGHT
         }
-    def __init__(self, screen, font, pac_images, config, buttons) -> None:
+    def __init__(self, screen, font, pac_images, config, buttons, game_state) -> None:
         self.screen = screen
         self.font = font
         self.pac_images = pac_images
         self.config = config
         self.buttons = buttons
         self.level_index = 0
+        self.game_state = game_state
         self.reset()
-        
+    
     def reset(self):
         level = self.config["level"][self.level_index]
         maze = load_maze(level["width"], level["height"],
@@ -34,20 +35,29 @@ class Gameplay:
         self.offset_x = (width - len(self.maze_grid[0]) * CELL_SIZE) // 2
         self.offset_y = (hieght - len(self.maze_grid) * CELL_SIZE) // 2
         self.player = Player(x=2, y=2, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
-        self.ghost = Ghost(x= 5, y =5, direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
-        self.ghost.state = GhostStates.EATEN
+        self.ghost = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
         self.ghost_last_move = 0.
         self.time_left = self.config["level_max_time"]
         self.last_move = 0
         self.frame_counter = 0
         self.pac_animation = cycle(self.pac_images)
         self.current_image = next(self.pac_animation)
-        for y, n in enumerate(self.maze_grid):
-            for x, cell in enumerate(n):
-                center = self.center_cell(x, y)
-                # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
-                if cell <= 14 and (self.player.x != x or self.player.y != y):
-                    pygame.draw.circle(self.screen, "black", center,4)
+        # self.maze = load_maze(self.config["level"][1]["width"], self.config["level"][1]["height"],
+        #                  self.config["seed"])
+        self.excluded = {(0, 0), (maze["width"] - 1, 0),
+                (0, maze["height"] - 1),
+                (maze["width"] - 1, maze["height"] - 1)}
+        self.pacgums = self.game_state.place_pacgums(maze["width"], 
+                                       maze["height"],
+                                       self.config["pacgum"],
+                                       self.excluded)
+        
+        # for y, n in enumerate(self.maze_grid):
+        #     for x, cell in enumerate(n):
+        #         center = self.center_cell(x, y)
+        #         # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
+        #         if cell <= 14 and (self.player.x != x or self.player.y != y):
+        #             pygame.draw.circle(self.screen, "black", center,4)
 
 
     def update(self, events, dt):
@@ -65,6 +75,7 @@ class Gameplay:
             self.player.x = 5 
             self.player.y = 5
         self.animate()
+        self.eat_pacgum()
         now = pygame.time.get_ticks()
         if now - self.ghost_last_move >= GHOST_DELAY:
             self.ghost.take_turn(self.player.x, self.player.y)
@@ -72,6 +83,15 @@ class Gameplay:
         if now - self.last_move >= PLAYER_DELAY and self.move_player():
             self.last_move = now
         return None
+    def draw_pacgums(self):
+        for x, y in self.pacgums:
+            print(x, y)
+            center = self.center_cell(x, y)
+            pygame.draw.circle(self.screen, "red", center, 4)
+    def eat_pacgum(self):
+            if (self.player.x, self.player.y) in self.pacgums:
+                self.pacgums.remove((self.player.x,self.player.y))
+                self.player.score += self.config["points_per_pacgum"]
     def animate(self):
         self.frame_counter += 1
         if self.frame_counter >= FRAME_PER_IMAGE:
@@ -98,6 +118,7 @@ class Gameplay:
         self.draw_ghost()
         self.draw_player()
         self.draw_hud()
+        self.draw_pacgums()
         # self.draw_pacgums()
         # self.death()
         for button in self.buttons:
@@ -122,13 +143,13 @@ class Gameplay:
     def draw_ghost(self):
         center = self.center_cell(self.ghost.x, self.ghost.y)
         pygame.draw.circle(self.screen, "red", center, 6)
-    def draw_pacgums(self):
-        for y, n in enumerate(self.maze_grid):
-            for x, cell in enumerate(n):
-                center = self.center_cell(x, y)
-                # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
-                if cell <= 14 and (self.player.x != x or self.player.y != y):
-                    pygame.draw.circle(self.screen, "black", center,4)
+    # def draw_pacgums(self):
+    #     for y, n in enumerate(self.maze_grid):
+    #         for x, cell in enumerate(n):
+    #             center = self.center_cell(x, y)
+    #             # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
+    #             if cell <= 14 and (self.player.x != x and self.player.y != y):
+    #                 pygame.draw.circle(self.screen, "black", center,4)
 
     def draw_hud(self):
         lines = [

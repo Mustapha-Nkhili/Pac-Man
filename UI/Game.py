@@ -6,6 +6,8 @@ from UI.menu import Menu
 
 from UI.Gameplay import Gameplay
 from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
+from src.logic.game_state import GameState
+from src.logic.maze import load_maze
 
 WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/pixel-game/Pixel Game.otf"
@@ -39,7 +41,7 @@ class Button:
         self.screen.blit(self.label, self.label.get_rect(center=self.rect.center))
 
 class Game:
-    def __init__(self, config) -> None:
+    def __init__(self, game_state: GameState, config) -> None:
         self.config = config
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -48,8 +50,11 @@ class Game:
         self.font = pygame.font.Font(FONT_PATH, 48)
         self.running = True
         self.state = "main_menu"
+        self.game_state = game_state
         self.load_assets()
         self.load_screens()
+        
+        # self.draw_pacgums()
     @staticmethod
     def images(path, size=None):
         image = pygame.image.load(path).convert_alpha()
@@ -67,6 +72,7 @@ class Game:
                            ("pacmanopen.png",
                             "pacmanclosed.png", 
                             "pacmanmid.png")]
+
     def load_screens(self):
         screen, font = self.screen, self.font
         switch = lambda state: partial(self.set_state, state)
@@ -79,7 +85,7 @@ class Game:
             ], images=[(self.logo, (420, 20))]),
             "playing": Gameplay(screen, font, self.pac_images, self.config,
                                 [Button(screen, 640, 15, 100, 50, font, "Pause", switch("pause")),
-                                ]),
+                                ], game_state=self.game_state),
             "pause": Menu(screen, font, self.pause_bg2, [
                 Button(screen,700, 360, 150, 50, font, "Resume", switch("playing")),
                 Button(screen, 540, 460, 200, 50, font, "Quit Game", self.quit),

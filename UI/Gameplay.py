@@ -59,6 +59,8 @@ class Gameplay:
             return "game_over"
         if self.player.lives <= 0:
             return "game_over"
+        elif self.ghost.x == self.player.x and self.ghost.y == self.player.y and self.ghost.state == GhostStates.SCARED:
+            self.ghost.x, self.ghost.y = 0 , 0 
         elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
             self.player.lives -= 1
             self.player.x = 5 
@@ -86,6 +88,9 @@ class Gameplay:
             pygame.draw.circle(self.screen, "black", center, 10)
 
     def eat_pacgum(self):
+            if len(self.pacgums) <= 0:
+                self.level_index += 1
+                self.reset()
             if (self.player.x, self.player.y) in self.pacgums:
                 self.pacgums.remove((self.player.x,self.player.y))
                 self.player.score += self.config["points_per_pacgum"]
@@ -146,8 +151,10 @@ class Gameplay:
         center = self.center_cell(self.player.x, self.player.y)
         self.screen.blit(self.current_image, self.current_image.get_rect(center=center))
     def draw_ghost(self):
+        ghost = pygame.image.load("img/my_ghost.png").convert_alpha()
         center = self.center_cell(self.ghost.x, self.ghost.y)
-        pygame.draw.circle(self.screen, "red", center, 6)
+        self.screen.blit(ghost, center)
+        # pygame.draw.circle(self.screen, "red", center, 6)
 
     def draw_hud(self):
         lines = [

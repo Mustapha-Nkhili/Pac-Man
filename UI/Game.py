@@ -77,6 +77,7 @@ class Game:
                            ("pacmanopen.png",
                             "pacmanclosed.png", 
                             "pacmanmid.png")]
+        self.ghost = self.images("img/my_ghost.png", (14,14))
 
     def load_screens(self):
         screen, font = self.screen, self.font

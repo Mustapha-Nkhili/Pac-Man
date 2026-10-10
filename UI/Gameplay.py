@@ -5,7 +5,7 @@ import pygame
 from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
 CELL_SIZE = 40
-BACKGROUND = (51, 55, 150)
+BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 90
 FRAME_PER_IMAGE = 8
 GHOST_DELAY = 250
@@ -78,7 +78,7 @@ class Gameplay:
         for x, y in self.pacgums:
             print(x, y)
             center = self.center_cell(x, y)
-            pygame.draw.circle(self.screen, "red", center, 4)
+            pygame.draw.circle(self.screen, "white", center, 2)
             print(self.excluded)
     def draw_super_pacgums(self):
         for x, y in self.excluded:
@@ -157,6 +157,6 @@ class Gameplay:
             f"level: {self.level_index + 1}"
         ]
         for i, text in enumerate(lines):
-            surface = self.font.render(text, True, (20,20,20))
+            surface = self.font.render(text, True, (255,255,255))
             self.screen.blit(surface, (20, 30 + i * 60))
         

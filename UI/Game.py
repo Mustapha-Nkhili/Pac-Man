@@ -20,11 +20,12 @@ class Button:
         "pressed": "#919191"
     }
 
-    def __init__(self, screen, x, y, width, height, font, text, on_click) -> None:
+    def __init__(self, screen, x, y, width, height, font, text, on_click, color=COLORS) -> None:
         self.screen = screen
         self.rect = pygame.Rect(x, y, width, height)
         self.on_click = on_click
         self.label = font.render(text, True, "white")
+        self.color = color
     
     def handle_event(self, event):
         if (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.rect.collidepoint(event.pos)):
@@ -37,10 +38,15 @@ class Button:
             state = "pressed" if pygame.mouse.get_pressed()[0] else "hover"
         else:
             state = "normal"
-        pygame.draw.rect(self.screen, self.COLORS[state], self.rect)
+        pygame.draw.rect(self.screen, self.color[state], self.rect)
         self.screen.blit(self.label, self.label.get_rect(center=self.rect.center))
 
 class Game:
+    CHCOLORS = {
+        "normal": (255, 0, 0),
+        "hover": "#631616",
+        "pressed": "#2B1B1B"
+    }
     def __init__(self, game_state: GameState, config) -> None:
         self.config = config
         pygame.init()
@@ -65,6 +71,7 @@ class Game:
         self.pause_bg = self.images("img/pause.png", window)
         self.pause_bg2 = self.images("img/pause_back2.jpg", window)
         self.instructions = self.images("img/Instructions.png", window)
+        self.cheat_bg = self.images("img/cheat_screen.png", window)
         self.pac_images = [self.images(f"img/{name}", (14, 14))
                            for name in 
                            ("pacmanopen.png",
@@ -82,15 +89,18 @@ class Game:
                 Button(screen, 450, 525, 300, 100, font, "QUIT GAME", self.quit),
             ], images=[(self.logo, (420, 20))]),
             "playing": Gameplay(screen, font, self.pac_images, self.config,
-                                [Button(screen, 640, 15, 100, 50, font, "Pause", switch("pause")),
+                                [Button(screen, 640, 15, 100, 30, font, "Pause", switch("pause")),
                                 ], game_state=self.game_state),
             "pause": Menu(screen, font, self.pause_bg2, [
                 Button(screen,700, 360, 150, 50, font, "Resume", switch("playing")),
                 Button(screen, 540, 460, 200, 50, font, "Quit Game", self.quit),
                 Button(screen, 390, 360, 200, 50, font, "main_menu", switch("main_menu")),
             ], images=[(self.pause_bg, (400, 190))]),
+            "cheat_screen": Menu(screen, font, self.cheat_bg,[
+                                 Button(screen, 400, 650, 200, 50, font, "main_menu", switch("main_menu"))]),
             "instructions": Menu(screen, font, self.instructions, [
-                Button(screen, 550, 650, 200, 50, font, "main_menu", switch("main_menu")),
+                Button(screen, 400, 650, 200, 50, font, "main_menu", switch("main_menu")),
+                Button(screen, 650, 650, 250, 50, font, "Cheat_Sheet", switch("cheat_screen"), self.CHCOLORS)
             ]),
             "game_over": Menu(screen, font, "black", [
                 Button(screen, 340, 380, 230, 50, font, "Play Again", self.new_game),

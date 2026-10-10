@@ -4,7 +4,7 @@ import pygame
 
 from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
-CELL_SIZE = 40
+CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 90
 FRAME_PER_IMAGE = 8
@@ -24,8 +24,9 @@ class Gameplay:
         self.buttons = buttons
         self.level_index = 0
         self.game_state = game_state
+        # self.player = None
         self.reset()
-    
+   
     def reset(self):
         level = self.config["level"][self.level_index]
         maze = load_maze(level["width"], level["height"],
@@ -34,7 +35,12 @@ class Gameplay:
         width, hieght = self.screen.get_size()
         self.offset_x = (width - len(self.maze_grid[0]) * CELL_SIZE) // 2
         self.offset_y = (hieght - len(self.maze_grid) * CELL_SIZE) // 2
-        self.player = Player(x=2, y=2, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
+        if getattr(self, "player", None) is None:
+            self.player = Player(x=2, y=2, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
+        else:
+            self.player.x = 2
+            self.player.y = 2
+            self.player.maze_grid = self.maze_grid
         self.ghost = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
         self.ghost_last_move = 0.
         self.time_left = self.config["level_max_time"]
@@ -85,7 +91,7 @@ class Gameplay:
     def draw_super_pacgums(self):
         for x, y in self.excluded:
             center = self.center_cell(x, y)
-            pygame.draw.circle(self.screen, "black", center, 10)
+            pygame.draw.circle(self.screen, "white", center, 6)
 
     def eat_pacgum(self):
             if len(self.pacgums) <= 0:
@@ -153,9 +159,9 @@ class Gameplay:
     def draw_ghost(self):
         ghost = pygame.image.load("img/my_ghost.png").convert_alpha()
         center = self.center_cell(self.ghost.x, self.ghost.y)
-        self.screen.blit(ghost, center)
+        self.screen.blit(ghost, ghost.get_rect(center=center))
         # pygame.draw.circle(self.screen, "red", center, 6)
-
+    
     def draw_hud(self):
         lines = [
             f"Lives: {self.player.lives}",
@@ -166,4 +172,7 @@ class Gameplay:
         for i, text in enumerate(lines):
             surface = self.font.render(text, True, (255,255,255))
             self.screen.blit(surface, (20, 30 + i * 60))
-        
+    # def full_reset(self):
+    #     self.player = None
+    #     self.level_index = 0
+    #     self.reset()

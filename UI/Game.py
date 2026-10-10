@@ -115,6 +115,8 @@ class Game:
     def set_state(self, state):
         self.state = state
     def new_game(self):
+        self.screens["playing"].player = None
+        self.screens["playing"].level_index = 0
         self.screens["playing"].reset()
         self.state = "playing"
     def quit(self):

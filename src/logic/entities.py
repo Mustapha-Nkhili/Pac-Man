@@ -172,6 +172,8 @@ class Player(Entity):
         super().__init__(x, y, direction, maze_grid)
         self.score = 0
         self.lives = lives
+        self.old_x = x
+        self.old_y = y
         self.spawn_x = x
         self.spawn_y = y
 

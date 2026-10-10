@@ -32,9 +32,10 @@ class Gameplay:
         maze = load_maze(level["width"], level["height"],
                          self.config["seed"])
         self.maze_grid = maze["maze"]
+        self.qued_move = None
         width, hieght = self.screen.get_size()
-        self.offset_x = (width - len(self.maze_grid[0]) * CELL_SIZE) // 2
-        self.offset_y = (hieght - len(self.maze_grid) * CELL_SIZE) // 2
+        # self.offset_x = (width - len(self.maze_grid[0]) * self.cell_size) // 2
+        # self.offset_y = (hieght - len(self.maze_grid) * self.cell_size) // 2
         if getattr(self, "player", None) is None:
             self.player = Player(x=2, y=2, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
         else:
@@ -44,6 +45,9 @@ class Gameplay:
         self.ghost = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
         self.ghost_last_move = 0.
         self.time_left = self.config["level_max_time"]
+        self.cell_size = min(width // level["width"], (hieght - 150) // level["height"])
+        self.offset_x = (width - len(self.maze_grid[0]) * self.cell_size) // 2
+        self.offset_y = (hieght - len(self.maze_grid) * self.cell_size) // 2
         self.last_move = 0
         self.frame_counter = 0
         self.pac_animation = cycle(self.pac_images)
@@ -71,6 +75,10 @@ class Gameplay:
             self.player.lives -= 1
             self.player.x = 5 
             self.player.y = 5
+            self.ghost.x = 4
+            self.ghost.y = 4
+            self.player.old_x = self.player.x
+            self.player.old_y = self.player.y
         self.animate()
         self.eat_pacgum()
         self.eat_super_pacgum()
@@ -81,13 +89,17 @@ class Gameplay:
             self.ghost_last_move = now
         if now - self.last_move >= PLAYER_DELAY and self.move_player():
             self.last_move = now
+        keys = pygame.key.get_pressed()
+        for key, direction in self.KEYS.items():
+            if keys[key]:
+                self.qued_move = direction
+                break
         return None
     def draw_pacgums(self):
         for x, y in self.pacgums:
             print(x, y)
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 2)
-            print(self.excluded)
     def draw_super_pacgums(self):
         for x, y in self.excluded:
             center = self.center_cell(x, y)
@@ -109,28 +121,30 @@ class Gameplay:
             self.current_image = next(self.pac_animation)
             self.frame_counter = 0
     def move_player(self):
-        keys = pygame.key.get_pressed()
         before = (self.player.x, self.player.y)
-        for key, direction in self.KEYS.items():
-            if keys[key]:
-                self.player.move(direction)
-                break
+        self.player.old_x, self.player.old_y = before
+        if self.qued_move:
+            self.player.move(self.qued_move)
         if (self.player.x, self.player.y) == before:
             self.player.move(self.player.direction)
+        else:
+            self.player.direction = self.qued_move
         return (self.player.x, self.player.y) != before
     def origin_cell(self, x, y):
-        return self.offset_x + x * CELL_SIZE, self.offset_y + y * CELL_SIZE
+        return self.offset_x + x * self.cell_size, self.offset_y + y * self.cell_size
     def center_cell(self, x, y):
         left, top = self.origin_cell(x, y)
-        return left + CELL_SIZE // 2, top + CELL_SIZE // 2
+        return left + self.cell_size // 2, top + self.cell_size // 2
     def draw(self):
         self.screen.fill(BACKGROUND)
         self.draw_maze()
+        self.draw_super_pacgums()
+        self.draw_pacgums()
         self.draw_ghost()
         self.draw_player()
         self.draw_hud()
-        self.draw_pacgums()
-        self.draw_super_pacgums()
+       
+        
         # self.draw_pacgums()
         # self.death()
         for button in self.buttons:
@@ -143,7 +157,7 @@ class Gameplay:
          for y, n in enumerate(self.maze_grid):
              for x, cell in enumerate(n):
                 left, top = self.origin_cell(x, y)
-                right, bottom = left + CELL_SIZE, top + CELL_SIZE
+                right, bottom = left + self.cell_size, top + self.cell_size
                 # screen_y = (y * CELL_SIZE) + (CELL_SIZE / 2)
                 if cell & 1:
                     pygame.draw.line(self.screen, "white", (left, top), (right, top),1)
@@ -154,8 +168,14 @@ class Gameplay:
                 if cell & 8:
                     pygame.draw.line(self.screen, "white", (left, top), (left, bottom),1)
     def draw_player(self):
-        center = self.center_cell(self.player.x, self.player.y)
-        self.screen.blit(self.current_image, self.current_image.get_rect(center=center))
+        now = pygame.time.get_ticks()
+        t = min((now - self.last_move) / PLAYER_DELAY, 1.0)
+        old_center = self.center_cell(self.player.old_x, self.player.old_y)
+        new_center = self.center_cell(self.player.x, self.player.y)
+        lerp_x = old_center[0] + (new_center[0] - old_center[0]) * t
+        lerp_y = old_center[1] + (new_center[1] - old_center[1]) * t
+        # center = self.center_cell(lerp_x, lerp_y)
+        self.screen.blit(self.current_image, self.current_image.get_rect(center=(lerp_x,lerp_y)))
     def draw_ghost(self):
         ghost = pygame.image.load("img/my_ghost.png").convert_alpha()
         center = self.center_cell(self.ghost.x, self.ghost.y)

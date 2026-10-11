@@ -1,0 +1,4 @@
+- Make the cheat mode work
+- ESC open the cheat window
+- [X] make pacman turn and face the direction is going
+- winning condition and make the player enter thier name

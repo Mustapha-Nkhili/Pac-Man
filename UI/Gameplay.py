@@ -16,6 +16,12 @@ class Gameplay:
         pygame.K_LEFT: LEFT,
         pygame.K_RIGHT: RIGHT
         }
+    DIRE  ={
+        1: 90,
+        2: 0,
+        8: 180,
+        4: -90,
+    }
     def __init__(self, screen, font, pac_images, config, buttons, game_state) -> None:
         self.screen = screen
         self.font = font
@@ -45,7 +51,7 @@ class Gameplay:
         self.ghost = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
         self.ghost_last_move = 0.
         self.time_left = self.config["level_max_time"]
-        self.cell_size = min(width // level["width"], (hieght - 150) // level["height"])
+        self.cell_size = min(width // level["width"], (hieght - 400) // level["height"])
         self.offset_x = (width - len(self.maze_grid[0]) * self.cell_size) // 2
         self.offset_y = (hieght - len(self.maze_grid) * self.cell_size) // 2
         self.last_move = 0
@@ -175,7 +181,9 @@ class Gameplay:
         lerp_x = old_center[0] + (new_center[0] - old_center[0]) * t
         lerp_y = old_center[1] + (new_center[1] - old_center[1]) * t
         # center = self.center_cell(lerp_x, lerp_y)
-        self.screen.blit(self.current_image, self.current_image.get_rect(center=(lerp_x,lerp_y)))
+        # print(self.player.direction)
+        img = pygame.transform.rotate(self.current_image, self.DIRE[self.player.direction])
+        self.screen.blit(img, img.get_rect(center=(lerp_x,lerp_y)))
     def draw_ghost(self):
         ghost = pygame.image.load("img/my_ghost.png").convert_alpha()
         center = self.center_cell(self.ghost.x, self.ghost.y)

@@ -4,6 +4,8 @@ import pygame
 
 from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
+import os
+import json
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 90
@@ -72,9 +74,9 @@ class Gameplay:
                     return None
         self.time_left = max(self.time_left - dt, 0)
         if self.time_left == 0:
-            return "game_over"
+            return "name_entry"
         if self.player.lives <= 0:
-            return "game_over"
+            return "name_entry"
         elif self.ghost.x == self.player.x and self.ghost.y == self.player.y and self.ghost.state == GhostStates.SCARED:
             self.ghost.x, self.ghost.y = 0 , 0 
         elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
@@ -103,7 +105,7 @@ class Gameplay:
         return None
     def draw_pacgums(self):
         for x, y in self.pacgums:
-            print(x, y)
+            # print(x, y)
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 2)
     def draw_super_pacgums(self):
@@ -200,6 +202,77 @@ class Gameplay:
         for i, text in enumerate(lines):
             surface = self.font.render(text, True, (255,255,255))
             self.screen.blit(surface, (20, 30 + i * 60))
+class Name_entry:
+    def __init__(self, screen, font, score, config) -> None:
+        self.screen = screen
+        self.font = font
+        self.player_name = ""
+        self.score = score
+        self.config = config
+    def update(self, events, dt):
+        # events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    self.player_name = self.player_name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    name_entry = {"name": self.player_name, "score":self.score}
+                    highscores = []
+                    if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                        with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
+                            highscores = json.load(f)
+                    highscores.append(name_entry)
+                    highscores = sorted(highscores, key= lambda item: item["score"], reverse=True)
+                    highscores = highscores[:10]
+                    with open(self.config.get("highscore_filename", "highscores.json"), "w") as f:
+                        json.dump(highscores, f, indent=4)
+                    return "highscores"
+                else:
+                    self.player_name += event.unicode
+        return None
+
+    def draw(self):
+        self.screen.fill((28,28,28))
+        Game_over = self.font.render("Enter your name to save it to the score board", True, "white")
+        text_sur = self.font.render(self.player_name, True, "white")
+        rect = text_sur.get_rect(center= (1280 // 2, 720 // 2))
+        game_rect = Game_over.get_rect(center= (1280 //2, 70))
+        self.screen.blit(text_sur, rect)
+        self.screen.blit(Game_over, game_rect)
+
+class HighScoreScreen:
+    def __init__(self,screen, font,config, buttons) -> None:
+        self.screen = screen
+        self.font = font
+        self.config = config
+        self.button = buttons
+        self.scores_data = []
+    def load_data(self):
+        if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+            with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
+                self.scores_data = json.load(f)
+    def update(self, events, dt):
+        for event in events:
+            for button in self.button:
+                if button.handle_event(event):
+                    return
+        return
+    def draw(self):
+        self.screen.fill("black")
+        for button in self.button:
+            button.draw()
+        title_surf = self.font.render("Top 10 Scores", True, "Yellow")
+        rect = title_surf.get_rect(center= (1280 // 2,  75))
+        self.screen.blit(title_surf, rect)
+
+        starting_y = 200
+        spacing = 40
+        for i , entery in enumerate(self.scores_data):
+            text = f"{i + 1}. {entery["name"]}: {entery["score"]} pts"
+            text_surf = self.font.render(text, True, "White")
+            rect = text_surf.get_rect(center= (1280 // 2, starting_y))
+            self.screen.blit(text_surf, rect)
+            starting_y += spacing
     # def full_reset(self):
     #     self.player = None
     #     self.level_index = 0

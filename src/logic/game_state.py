@@ -4,12 +4,19 @@ from .entities import Player, Ghost, GhostStates
 
 
 class GameState:
-    def place_pacgums(self, width: int, height: int, count: int,
-                      excluded: set[tuple[int, int]]) -> set[tuple[int, int]]:
+    def _get_corners(self, width: int, height: int) -> set[tuple[int, int]]:
+        return {(0, 0), (width - 1, 0),
+                (0, height - 1),
+                (width - 1, height - 1)}
+
+
+    def place_pacgums(self, width: int, height: int, maze: list[list[int]], count: int) -> set[tuple[int, int]]:
         rng = random.Random()
 
-        all_cells = [(x, y) for x in range(width) for y in range(height)]
-        available = [cell for cell in all_cells if cell not in excluded]
+        center_cell = (width // 2, height // 2)
+        excluded = self._get_corners(width, height) | {center_cell}
+        cells_without_42 = [(x, y) for x in range(width) for y in range(height) if maze[y][x] < 15]
+        available = [cell for cell in cells_without_42 if cell not in excluded]
 
         count = min(count, len(available))
         return set(rng.sample(available, count))

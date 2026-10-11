@@ -63,8 +63,8 @@ class Gameplay:
                 (maze["width"] - 1, maze["height"] - 1)}
         self.pacgums = self.game_state.place_pacgums(maze["width"], 
                                        maze["height"],
-                                       self.config["pacgum"],
-                                       self.excluded)
+                                       maze["maze"],
+                                       self.config["pacgum"])
     def update(self, events, dt):
         for event in events:
             for button in self.buttons:
@@ -115,9 +115,8 @@ class Gameplay:
             if len(self.pacgums) <= 0:
                 self.level_index += 1
                 self.reset()
-            if (self.player.x, self.player.y) in self.pacgums:
-                self.pacgums.remove((self.player.x,self.player.y))
-                self.player.score += self.config["points_per_pacgum"]
+            self.game_state.check_pacgums_collisions(self.player, self.pacgums, self.config["points_per_pacgum"])
+
     def eat_super_pacgum(self):
         if (self.player.x, self.player.y) in self.excluded:
             self.ghost.state = GhostStates.SCARED

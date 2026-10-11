@@ -65,6 +65,8 @@ class Gameplay:
                                        maze["height"],
                                        maze["maze"],
                                        self.config["pacgum"])
+        self.super_pacgums = self.game_state.place_super_pacgums(maze["width"], maze["height"])
+
     def update(self, events, dt):
         for event in events:
             for button in self.buttons:
@@ -107,7 +109,7 @@ class Gameplay:
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 2)
     def draw_super_pacgums(self):
-        for x, y in self.excluded:
+        for x, y in self.super_pacgums:
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 6)
 
@@ -118,8 +120,11 @@ class Gameplay:
             self.game_state.check_pacgums_collisions(self.player, self.pacgums, self.config["points_per_pacgum"])
 
     def eat_super_pacgum(self):
-        if (self.player.x, self.player.y) in self.excluded:
-            self.ghost.state = GhostStates.SCARED
+        self.game_state.check_superpacgums_collisions(self.player,
+                                self.super_pacgums,
+                                [self.ghost],
+                                pygame.time.get_ticks(),
+                                self.config["points_per_super_pacgum"])
     def animate(self):
         self.frame_counter += 1
         if self.frame_counter >= FRAME_PER_IMAGE:

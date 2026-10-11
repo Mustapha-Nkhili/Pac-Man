@@ -21,6 +21,9 @@ class GameState:
         count = min(count, len(available))
         return set(rng.sample(available, count))
 
+    def place_super_pacgums(self, width: int, height: int) -> set[tuple[int, int]]:
+        return self._get_corners(width, height)
+
     def check_collisions(self, player: Player, ghosts: list[Ghost], points_per_ghost: int) -> None:
         for ghost in ghosts:
             if (player.x, player.y) != (ghost.x, ghost.y):
@@ -41,3 +44,19 @@ class GameState:
         if (player.x, player.y) in pacgums:
             pacgums.remove((player.x, player.y))
             player.score += points_per_pacgum
+
+
+    def check_superpacgums_collisions(self,
+                                 player: Player,
+                                 super_pacgums: set[tuple[int, int]],
+                                 ghosts: list[Ghost],
+                                 now: int,
+                                 points_per_super_pacgum: int) -> None:
+        if (player.x, player.y) in super_pacgums:
+            super_pacgums.remove((player.x, player.y))
+            player.score += points_per_super_pacgum
+            for ghost in ghosts:
+                if ghost.state == GhostStates.EATEN:
+                    continue
+                ghost.state = GhostStates.SCARED
+                ghost.scared_until = now + ghost.scared_duration

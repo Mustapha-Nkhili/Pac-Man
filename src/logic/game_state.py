@@ -3,6 +3,8 @@ import random
 from .entities import Player, Ghost, GhostStates
 
 
+ALL_Walls = 15
+
 class GameState:
     def _get_corners(self, width: int, height: int) -> set[tuple[int, int]]:
         return {(0, 0), (width - 1, 0),
@@ -15,7 +17,7 @@ class GameState:
 
         center_cell = (width // 2, height // 2)
         excluded = self._get_corners(width, height) | {center_cell}
-        cells_without_42 = [(x, y) for x in range(width) for y in range(height) if maze[y][x] < 15]
+        cells_without_42 = [(x, y) for x in range(width) for y in range(height) if maze[y][x] < ALL_Walls]
         available = [cell for cell in cells_without_42 if cell not in excluded]
 
         count = min(count, len(available))

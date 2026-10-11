@@ -11,11 +11,6 @@ def main():
     config = load_config(sys.argv[1])
     maze = load_maze(config["level"][1]["width"], config["level"][1]["height"],
                          config["seed"])
-    print(maze)
-    pacgums = game_state.place_pacgums(maze["width"],
-                                       maze["height"],
-                                       maze["maze"],
-                                       config["pacgum"])
     Game(game_state, config).run()
 
 

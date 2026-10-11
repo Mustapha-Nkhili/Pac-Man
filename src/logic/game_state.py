@@ -25,3 +25,12 @@ class GameState:
             elif ghost.state == GhostStates.CHASE:
                 player.lives -= 1
                 player.respawn()
+
+
+    def check_pacgums_collisions(self,
+                                 player: Player,
+                                 pacgums: set[tuple[int, int]],
+                                 points_per_pacgum: int):
+        if (player.x, player.y) in pacgums:
+            pacgums.remove((player.x, player.y))
+            player.score += points_per_pacgum

@@ -18,8 +18,6 @@ def main():
                                        maze["height"],
                                        config["pacgum"],
                                        excluded)
-    print(pacgums)
-
     Game(game_state, config).run()
 
 

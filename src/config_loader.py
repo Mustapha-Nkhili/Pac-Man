@@ -100,6 +100,11 @@ def load_config(config_path: str) -> dict:
         print(f"Config Error: {e}, using defaults")
         return DEFAULTS.copy()
 
+    if not isinstance(data, dict):
+        print("Config Error: the config file must be a JSON object, "
+              "using defaults")
+        return DEFAULTS.copy()
+
     config = DEFAULTS.copy()
     for key, default in DEFAULTS.items():
         value = data.get(key)

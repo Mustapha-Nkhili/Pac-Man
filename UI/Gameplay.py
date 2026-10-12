@@ -220,6 +220,9 @@ class Name_entry:
                     name_entry = {"name": self.player_name, "score":self.score}
                     highscores = []
                     if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                        if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
+                            print("FILE TOO BIG")
+                            return 
                         with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
                             highscores = json.load(f)
                     highscores.append(name_entry)
@@ -249,32 +252,52 @@ class HighScoreScreen:
         self.button = buttons
         self.scores_data = []
     def load_data(self):
+        
         try:
+           
             validating_data = []
             if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
+                    print("FILE TOO BIG")
+                    return 
                 with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
                     validating_data = json.load(f)
             if not isinstance(validating_data, list):
                 print("invalid data format")
                 return
-            valid_data = []
-            for data in validating_data:
-                if not isinstance(data, dict):
-                    continue
-                if 'name' not in data or "score" not in data:
-                    continue
-                if not isinstance(data["name"], str):
-                    continue
-                if not isinstance(data["score"], int):
-                    continue
-                if data["score"] < 0:
-                    continue
-                if not data["name"].isalnum():
-                    continue
-                valid_data.append(data)
+            valid_data = HighScoreScreen.dig(validating_data)
+            # for data in validating_data:
+            #     if not isinstance(data, dict):
+            #         continue
+            #     if 'name' not in data or "score" not in data:
+            #         continue
+            #     if not isinstance(data["name"], str):
+            #         continue
+            #     if not isinstance(data["score"], int):
+            #         continue
+            #     if data["score"] < 0:
+            #         continue
+            #     if not data["name"].isalnum():
+            #         continue
+            #     valid_data.append(data)
             self.scores_data = valid_data
         except (JSONDecodeError, PermissionError)as e:
             print({e})
+    @staticmethod
+    def dig(validating_data):
+        valid_data = []
+        if isinstance(validating_data, dict):
+            # for data in validating_data:
+                # print(data)
+                # if isinstance(data, dict):
+                #     continue
+                if 'name' in validating_data and "score" in validating_data and isinstance(validating_data["name"], str) and isinstance(validating_data["score"], int) and validating_data["score"] >= 0 and validating_data["name"].isalnum() and len(validating_data["name"]) <= 10:
+                    valid_data.append(validating_data)
+        elif isinstance(validating_data, list):
+            for i in validating_data:
+                dig_data = HighScoreScreen.dig(i)
+                valid_data.extend(dig_data)
+        return valid_data
     def update(self, events, dt):
         for event in events:
             for button in self.button:

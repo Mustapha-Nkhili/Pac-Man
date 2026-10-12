@@ -70,6 +70,9 @@ class Gameplay:
                                        self.excluded)
     def update(self, events, dt):
         for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+                    self.player.lives += 1
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
@@ -160,8 +163,8 @@ class Gameplay:
             button.draw()
     def cheat_mode(self):
         key = pygame.key.get_pressed()
-        if key == pygame.K_0:
-            print("waaaa")
+        if key == pygame.K_y:
+            self.player.lives += 1
     def draw_maze(self):
          for y, n in enumerate(self.maze_grid):
              for x, cell in enumerate(n):

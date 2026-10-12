@@ -255,7 +255,7 @@ class HighScoreScreen:
         for event in events:
             for button in self.button:
                 if button.handle_event(event):
-                    return "highscores"
+                    return 
         return
     def draw(self):
         self.screen.fill("black")

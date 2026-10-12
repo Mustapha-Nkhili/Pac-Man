@@ -1,6 +1,6 @@
 [
     {
-        "name": "oo",
+        "name": 54545,
         "score": 140
     },
     {
@@ -12,8 +12,8 @@
         "score": 40
     },
     {
-        "name": "daw",
-        "score": 20
+        "ss": "daw",
+        "asd": 20
     },
     {
         "name": "ss",
@@ -29,11 +29,11 @@
     },
     {
         "name": "ss",
-        "score": 0
+        "score": -1
     },
     {
         "name": "dsad",
-        "score": 0
+        "score": "sadads"
     },
     {
         "name": "dsadasdasd",

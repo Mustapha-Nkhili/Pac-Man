@@ -112,6 +112,8 @@ class Game:
         }
     def set_state(self, state):
         self.state = state
+        if state == "highscores":
+                    self.screens["highscores"].load_data()
     def new_game(self):
         self.screens["playing"].player = None
         self.screens["playing"].level_index = 0

@@ -6,6 +6,7 @@ from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
 import os
 import json
+from json import JSONDecodeError
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 90
@@ -248,14 +249,37 @@ class HighScoreScreen:
         self.button = buttons
         self.scores_data = []
     def load_data(self):
-        if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
-            with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
-                self.scores_data = json.load(f)
+        try:
+            validating_data = []
+            if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
+                    validating_data = json.load(f)
+            if not isinstance(validating_data, list):
+                print("invalid data format")
+                return
+            valid_data = []
+            for data in validating_data:
+                if not isinstance(data, dict):
+                    continue
+                if 'name' not in data or "score" not in data:
+                    continue
+                if not isinstance(data["name"], str):
+                    continue
+                if not isinstance(data["score"], int):
+                    continue
+                if data["score"] < 0:
+                    continue
+                if not data["name"].isalnum():
+                    continue
+                valid_data.append(data)
+            self.scores_data = valid_data
+        except (JSONDecodeError, PermissionError)as e:
+            print({e})
     def update(self, events, dt):
         for event in events:
             for button in self.button:
                 if button.handle_event(event):
-                    return 
+                    return "main_menu"
         return
     def draw(self):
         self.screen.fill("black")

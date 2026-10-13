@@ -73,6 +73,8 @@ class Gameplay:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
                     self.player.lives += 1
+                if event.key == pygame.K_n and event.mod & pygame.KMOD_SHIFT:
+                    self.level_index += 1
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
@@ -225,9 +227,14 @@ class Name_entry:
                     if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
                         if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
                             print("FILE TOO BIG")
-                            return 
+                            return
                         with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
                             highscores = json.load(f)
+                    if not isinstance(highscores, list):
+                        print("invalid data format")
+                        return
+                    valid_data = HighScoreScreen.dig(highscores)
+                    highscores = (valid_data)
                     highscores.append(name_entry)
                     highscores = sorted(highscores, key= lambda item: item["score"], reverse=True)
                     highscores = highscores[:10]
@@ -235,7 +242,8 @@ class Name_entry:
                         json.dump(highscores, f, indent=4)
                     return "highscores"
                 else:
-                    self.player_name += event.unicode
+                    if event.unicode.isalnum() and len(self.player_name) < 10:
+                        self.player_name += event.unicode
         return None
 
     def draw(self):
@@ -294,7 +302,12 @@ class HighScoreScreen:
                 # print(data)
                 # if isinstance(data, dict):
                 #     continue
-                if 'name' in validating_data and "score" in validating_data and isinstance(validating_data["name"], str) and isinstance(validating_data["score"], int) and validating_data["score"] >= 0 and validating_data["name"].isalnum() and len(validating_data["name"]) <= 10:
+                if ('name' in validating_data and "score" in validating_data and
+                isinstance(validating_data["name"], str) and 
+                isinstance(validating_data["score"], int) and 
+                validating_data["score"] >= 0 and 
+                validating_data["name"].isalnum() and
+                len(validating_data["name"]) <= 10):
                     valid_data.append(validating_data)
         elif isinstance(validating_data, list):
             for i in validating_data:

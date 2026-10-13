@@ -37,6 +37,8 @@ class Gameplay:
         self.reset()
    
     def reset(self):
+        if len(self.config["level"]) <= self.level_index:
+            return "name_entry"
         level = self.config["level"][self.level_index]
         maze = load_maze(level["width"], level["height"],
                          self.config["seed"])
@@ -48,10 +50,15 @@ class Gameplay:
         if getattr(self, "player", None) is None:
             self.player = Player(x=2, y=2, lives=self.config["lives"], direction=RIGHT, maze_grid=self.maze_grid)
         else:
-            self.player.x = 2
-            self.player.y = 2
+            self.player.respawn()
+            # self.player.x = 2
+            # self.player.y = 2
             self.player.maze_grid = self.maze_grid
         self.ghost = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMRIGHT)
+        self.ghost3 = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.TOPLEFT)
+        self.ghost2 = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.TOPRIGHT)
+        self.ghost4 = Ghost(direction=RIGHT, maze_grid=self.maze_grid, corner=GhostCorners.BOTTOMLEFT)
+        self.ghosts_list = [self.ghost, self.ghost2, self.ghost3, self.ghost4]
         self.ghost_last_move = 0.
         self.time_left = self.config["level_max_time"]
         self.cell_size = min(width // level["width"], (hieght - 400) // level["height"])
@@ -75,8 +82,9 @@ class Gameplay:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
                     self.player.lives += 1
-                if event.key == pygame.K_n and event.mod & pygame.KMOD_SHIFT:
+                if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
                     self.level_index += 1
+                    self.reset()
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
@@ -85,23 +93,27 @@ class Gameplay:
             return "name_entry"
         if self.player.lives <= 0:
             return "name_entry"
-        elif self.ghost.x == self.player.x and self.ghost.y == self.player.y and self.ghost.state == GhostStates.SCARED:
-            self.ghost.x, self.ghost.y = 0 , 0 
-        elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
-            self.player.lives -= 1
-            self.player.x = 5 
-            self.player.y = 5
-            self.ghost.x = 4
-            self.ghost.y = 4
-            self.player.old_x = self.player.x
-            self.player.old_y = self.player.y
+        if len(self.config["level"]) <= self.level_index:
+            return "name_entry"
+        self.game_state.check_collisions(self.player, self.ghosts_list, self.config["points_per_ghost"])
+        # elif self.ghost.x == self.player.x and self.ghost.y == self.player.y and self.ghost.state == GhostStates.SCARED:
+        #     self.ghost.x, self.ghost.y = 0 , 0 
+        # elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
+        #     self.player.lives -= 1
+        #     self.player.x = 5 
+        #     self.player.y = 5
+        #     self.ghost.x = 4
+        #     self.ghost.y = 4
+        #     self.player.old_x = self.player.x
+        #     self.player.old_y = self.player.y
         self.animate()
         self.eat_pacgum()
         self.eat_super_pacgum()
         self.cheat_mode()
         now = pygame.time.get_ticks()
         if now - self.ghost_last_move >= GHOST_DELAY:
-            self.ghost.take_turn(self.player.x, self.player.y)
+            for ghost in self.ghosts_list:
+                ghost.take_turn(self.player.x, self.player.y)
             self.ghost_last_move = now
         if now - self.last_move >= PLAYER_DELAY and self.move_player():
             self.last_move = now
@@ -130,7 +142,7 @@ class Gameplay:
     def eat_super_pacgum(self):
         self.game_state.check_superpacgums_collisions(self.player,
                                 self.super_pacgums,
-                                [self.ghost],
+                                self.ghosts_list,
                                 pygame.time.get_ticks(),
                                 self.config["points_per_super_pacgum"])
     def animate(self):
@@ -197,9 +209,11 @@ class Gameplay:
         img = pygame.transform.rotate(self.current_image, self.DIRE[self.player.direction])
         self.screen.blit(img, img.get_rect(center=(lerp_x,lerp_y)))
     def draw_ghost(self):
-        ghost = pygame.image.load("img/my_ghost.png").convert_alpha()
-        center = self.center_cell(self.ghost.x, self.ghost.y)
-        self.screen.blit(ghost, ghost.get_rect(center=center))
+        for ghost in self.ghosts_list:
+
+            ghost_img = pygame.image.load("img/my_ghost.png").convert_alpha()
+            center = self.center_cell(ghost.x, ghost.y)
+            self.screen.blit(ghost_img, ghost_img.get_rect(center=center))
         # pygame.draw.circle(self.screen, "red", center, 6)
     
     def draw_hud(self):
@@ -221,43 +235,55 @@ class Name_entry:
         self.config = config
     def update(self, events, dt):
         # events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE:
-                    self.player_name = self.player_name[:-1]
-                elif event.key == pygame.K_RETURN:
-                    name_entry = {"name": self.player_name, "score":self.score}
-                    highscores = []
-                    if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
-                        if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
-                            print("FILE TOO BIG")
+        try:
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        self.player_name = self.player_name[:-1]
+                    elif event.key == pygame.K_RETURN:
+                        if self.player_name == "":
+                            self.player_name = "Player"
+                        name_entry = {"name": self.player_name, "score":self.score}
+                        highscores = []
+                        if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                            if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
+                                print("FILE TOO BIG")
+                                return
+                            with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
+                                highscores = json.load(f)
+                        if not isinstance(highscores, list):
+                            print("invalid data format")
                             return
-                        with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
-                            highscores = json.load(f)
-                    if not isinstance(highscores, list):
-                        print("invalid data format")
-                        return
-                    valid_data = HighScoreScreen.dig(highscores)
-                    highscores = (valid_data)
-                    highscores.append(name_entry)
-                    highscores = sorted(highscores, key= lambda item: item["score"], reverse=True)
-                    highscores = highscores[:10]
-                    with open(self.config.get("highscore_filename", "highscores.json"), "w") as f:
-                        json.dump(highscores, f, indent=4)
-                    return "highscores"
-                else:
-                    if event.unicode.isalnum() and len(self.player_name) < 10:
-                        self.player_name += event.unicode
+                        valid_data = HighScoreScreen.dig(highscores)
+                        highscores = (valid_data)
+                        highscores.append(name_entry)
+                        highscores = sorted(highscores, key= lambda item: item["score"], reverse=True)
+                        highscores = highscores[:10]
+                        with open(self.config.get("highscore_filename", "highscores.json"), "w") as f:
+                            json.dump(highscores, f, indent=4)
+                        return "highscores"
+                    else:
+                        if event.unicode.isalnum() and len(self.player_name) < 10:
+                            self.player_name += event.unicode
+        except (JSONDecodeError, PermissionError)as e:
+            print({e})
         return None
 
     def draw(self):
         self.screen.fill((28,28,28))
-        Game_over = self.font.render("Enter your name to save it to the score board", True, "white")
-        text_sur = self.font.render(self.player_name, True, "white")
+        Game_over = self.font.render("type your name and press enter to save it to the score board", True, "white")
+        score_sur = self.font.render(f"{self.score} Pts", True, "white")
+        text_sur = self.font.render(self.player_name, True, "black")
+        score_rect = score_sur.get_rect(center= (1280 // 2, 300))
+        
         rect = text_sur.get_rect(center= (1280 // 2, 720 // 2))
+        rect_rect = pygame.Surface((250, 50)).get_rect(center=(1280 // 2, 720 // 2))
         game_rect = Game_over.get_rect(center= (1280 //2, 70))
+        pygame.draw.rect(self.screen, "white", rect_rect)
         self.screen.blit(text_sur, rect)
+        self.screen.blit(score_sur, score_rect)
         self.screen.blit(Game_over, game_rect)
+
 
 class HighScoreScreen:
     def __init__(self,screen, font,config, buttons) -> None:
@@ -269,7 +295,6 @@ class HighScoreScreen:
     def load_data(self):
         
         try:
-           
             validating_data = []
             if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
                 if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
@@ -307,6 +332,7 @@ class HighScoreScreen:
                 # if isinstance(data, dict):
                 #     continue
                 if ('name' in validating_data and "score" in validating_data and
+                not isinstance(validating_data["score"], bool) and
                 isinstance(validating_data["name"], str) and 
                 isinstance(validating_data["score"], int) and 
                 validating_data["score"] >= 0 and 

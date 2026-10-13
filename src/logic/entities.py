@@ -179,3 +179,4 @@ class Player(Entity):
 
     def respawn(self) -> None:
         self.x, self.y = self.spawn_x, self.spawn_y
+        self.old_x, self.old_y = self.spawn_x, self.spawn_y

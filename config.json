@@ -2,9 +2,9 @@
   "highscore_filename": "highscores.json",
 
   "seed": 42,
-  "level_max_time": 1,
+  "level_max_time": 100,
 
-  "lives": 1,
+  "lives": 3,
 
   "pacgum": 20,
   "points_per_pacgum": 10,

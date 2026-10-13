@@ -4,10 +4,8 @@ import pygame
 
 from UI.menu import Menu
 
-from UI.Gameplay import Gameplay
-from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
+from UI.Gameplay import Gameplay, Name_entry, HighScoreScreen
 from src.logic.game_state import GameState
-from src.logic.maze import load_maze
 
 WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/pixel-game/Pixel Game.otf"
@@ -78,7 +76,6 @@ class Game:
                             "pacmanclosed.png", 
                             "pacmanmid.png")]
         self.ghost = self.images("img/my_ghost.png", (14,14))
-
     def load_screens(self):
         screen, font = self.screen, self.font
         switch = lambda state: partial(self.set_state, state)
@@ -107,13 +104,16 @@ class Game:
                 Button(screen, 340, 380, 230, 50, font, "Play Again", self.new_game),
                 Button(screen, 650, 380, 230, 50, font, "main_menu", switch("main_menu")),
             ], title="Game Over", title_pos=(520, 300)),
-            "highscores": Menu(screen, font, "black", [
+            "highscores": HighScoreScreen(screen, font, self.config, [
                 Button(screen, 550, 650, 200, 50, font, "main_menu", switch("main_menu")),
-            ])
+            ]),
+            "name_entry": Name_entry(screen, font, 0,self.config, )
 
         }
     def set_state(self, state):
         self.state = state
+        if state == "highscores":
+                    self.screens["highscores"].load_data()
     def new_game(self):
         self.screens["playing"].player = None
         self.screens["playing"].level_index = 0
@@ -129,6 +129,11 @@ class Game:
                 self.running = False
             next_state = self.screens[self.state].update(events, dt)
             if next_state:
+                if next_state == "name_entry":
+                    final_score = self.screens["playing"].player.score
+                    self.screens["name_entry"].score = final_score
+                elif next_state == "highscores":
+                    self.screens["highscores"].load_data()
                 self.state = next_state
             self.screens[self.state].draw()
             pygame.display.flip()    

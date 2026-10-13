@@ -4,6 +4,9 @@ import pygame
 
 from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
+import os
+import json
+from json import JSONDecodeError
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 90
@@ -69,14 +72,19 @@ class Gameplay:
 
     def update(self, events, dt):
         for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+                    self.player.lives += 1
+                if event.key == pygame.K_n and event.mod & pygame.KMOD_SHIFT:
+                    self.level_index += 1
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
         self.time_left = max(self.time_left - dt, 0)
         if self.time_left == 0:
-            return "game_over"
+            return "name_entry"
         if self.player.lives <= 0:
-            return "game_over"
+            return "name_entry"
         elif self.ghost.x == self.player.x and self.ghost.y == self.player.y and self.ghost.state == GhostStates.SCARED:
             self.ghost.x, self.ghost.y = 0 , 0 
         elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
@@ -105,7 +113,7 @@ class Gameplay:
         return None
     def draw_pacgums(self):
         for x, y in self.pacgums:
-            print(x, y)
+            # print(x, y)
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 2)
     def draw_super_pacgums(self):
@@ -161,8 +169,8 @@ class Gameplay:
             button.draw()
     def cheat_mode(self):
         key = pygame.key.get_pressed()
-        if key == pygame.K_0:
-            print("waaaa")
+        if key == pygame.K_y:
+            self.player.lives += 1
     def draw_maze(self):
          for y, n in enumerate(self.maze_grid):
              for x, cell in enumerate(n):
@@ -204,6 +212,134 @@ class Gameplay:
         for i, text in enumerate(lines):
             surface = self.font.render(text, True, (255,255,255))
             self.screen.blit(surface, (20, 30 + i * 60))
+class Name_entry:
+    def __init__(self, screen, font, score, config) -> None:
+        self.screen = screen
+        self.font = font
+        self.player_name = ""
+        self.score = score
+        self.config = config
+    def update(self, events, dt):
+        # events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    self.player_name = self.player_name[:-1]
+                elif event.key == pygame.K_RETURN:
+                    name_entry = {"name": self.player_name, "score":self.score}
+                    highscores = []
+                    if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                        if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
+                            print("FILE TOO BIG")
+                            return
+                        with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
+                            highscores = json.load(f)
+                    if not isinstance(highscores, list):
+                        print("invalid data format")
+                        return
+                    valid_data = HighScoreScreen.dig(highscores)
+                    highscores = (valid_data)
+                    highscores.append(name_entry)
+                    highscores = sorted(highscores, key= lambda item: item["score"], reverse=True)
+                    highscores = highscores[:10]
+                    with open(self.config.get("highscore_filename", "highscores.json"), "w") as f:
+                        json.dump(highscores, f, indent=4)
+                    return "highscores"
+                else:
+                    if event.unicode.isalnum() and len(self.player_name) < 10:
+                        self.player_name += event.unicode
+        return None
+
+    def draw(self):
+        self.screen.fill((28,28,28))
+        Game_over = self.font.render("Enter your name to save it to the score board", True, "white")
+        text_sur = self.font.render(self.player_name, True, "white")
+        rect = text_sur.get_rect(center= (1280 // 2, 720 // 2))
+        game_rect = Game_over.get_rect(center= (1280 //2, 70))
+        self.screen.blit(text_sur, rect)
+        self.screen.blit(Game_over, game_rect)
+
+class HighScoreScreen:
+    def __init__(self,screen, font,config, buttons) -> None:
+        self.screen = screen
+        self.font = font
+        self.config = config
+        self.button = buttons
+        self.scores_data = []
+    def load_data(self):
+        
+        try:
+           
+            validating_data = []
+            if os.path.exists(self.config.get("highscore_filename", "highscores.json")):
+                if os.path.getsize(self.config.get("highscore_filename", "highscores.json")) // 1024 > 100:
+                    print("FILE TOO BIG")
+                    return 
+                with open(self.config.get("highscore_filename", "highscores.json"), "r") as f:
+                    validating_data = json.load(f)
+            if not isinstance(validating_data, list):
+                print("invalid data format")
+                return
+            valid_data = HighScoreScreen.dig(validating_data)
+            # for data in validating_data:
+            #     if not isinstance(data, dict):
+            #         continue
+            #     if 'name' not in data or "score" not in data:
+            #         continue
+            #     if not isinstance(data["name"], str):
+            #         continue
+            #     if not isinstance(data["score"], int):
+            #         continue
+            #     if data["score"] < 0:
+            #         continue
+            #     if not data["name"].isalnum():
+            #         continue
+            #     valid_data.append(data)
+            self.scores_data = valid_data
+        except (JSONDecodeError, PermissionError)as e:
+            print({e})
+    @staticmethod
+    def dig(validating_data):
+        valid_data = []
+        if isinstance(validating_data, dict):
+            # for data in validating_data:
+                # print(data)
+                # if isinstance(data, dict):
+                #     continue
+                if ('name' in validating_data and "score" in validating_data and
+                isinstance(validating_data["name"], str) and 
+                isinstance(validating_data["score"], int) and 
+                validating_data["score"] >= 0 and 
+                validating_data["name"].isalnum() and
+                len(validating_data["name"]) <= 10):
+                    valid_data.append(validating_data)
+        elif isinstance(validating_data, list):
+            for i in validating_data:
+                dig_data = HighScoreScreen.dig(i)
+                valid_data.extend(dig_data)
+        return valid_data
+    def update(self, events, dt):
+        for event in events:
+            for button in self.button:
+                if button.handle_event(event):
+                    return "main_menu"
+        return
+    def draw(self):
+        self.screen.fill("black")
+        for button in self.button:
+            button.draw()
+        title_surf = self.font.render("Top 10 Scores", True, "Yellow")
+        rect = title_surf.get_rect(center= (1280 // 2,  75))
+        self.screen.blit(title_surf, rect)
+
+        starting_y = 200
+        spacing = 40
+        for i , entery in enumerate(self.scores_data):
+            text = f"{i + 1}. {entery["name"]}: {entery["score"]} pts"
+            text_surf = self.font.render(text, True, "White")
+            rect = text_surf.get_rect(center= (1280 // 2, starting_y))
+            self.screen.blit(text_surf, rect)
+            starting_y += spacing
     # def full_reset(self):
     #     self.player = None
     #     self.level_index = 0

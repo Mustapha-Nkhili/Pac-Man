@@ -1,5 +1,9 @@
 [
     {
+        "name": "dasdadsad",
+        "score": 1380
+    },
+    {
         "name": "asdlkaskld",
         "score": 1030
     },
@@ -10,6 +14,10 @@
     {
         "name": "asdlkaskld",
         "score": 310
+    },
+    {
+        "name": "sadasd",
+        "score": 180
     },
     {
         "name": "adfdfasasd",
@@ -30,13 +38,5 @@
     {
         "name": "asdlkaskld",
         "score": 30
-    },
-    {
-        "name": "Player",
-        "score": 20
-    },
-    {
-        "name": "Player",
-        "score": 10
     }
 ]

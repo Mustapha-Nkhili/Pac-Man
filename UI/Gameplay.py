@@ -79,12 +79,12 @@ class Gameplay:
 
     def update(self, events, dt):
         for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
-                    self.player.lives += 1
-                if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
-                    self.level_index += 1
-                    self.reset()
+            # if event.type == pygame.KEYDOWN:
+                # if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+                #     self.player.lives += 1
+                # if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
+                #     self.level_index += 1
+                #     self.reset()
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
@@ -109,7 +109,7 @@ class Gameplay:
         self.animate()
         self.eat_pacgum()
         self.eat_super_pacgum()
-        self.cheat_mode()
+        self.cheat_mode(events)
         now = pygame.time.get_ticks()
         if now - self.ghost_last_move >= GHOST_DELAY:
             for ghost in self.ghosts_list:
@@ -179,7 +179,15 @@ class Gameplay:
         # self.death()
         for button in self.buttons:
             button.draw()
-    def cheat_mode(self):
+    def cheat_mode(self, events=None):
+        if events:
+            for event in events:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+                        self.player.lives += 1
+                    if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
+                        self.level_index += 1
+                self.reset()
         key = pygame.key.get_pressed()
         if key == pygame.K_y:
             self.player.lives += 1
@@ -211,7 +219,9 @@ class Gameplay:
     def draw_ghost(self):
         for ghost in self.ghosts_list:
 
-            ghost_img = pygame.image.load("img/my_ghost.png").convert_alpha()
+            ghost_img = pygame.image.load("img/pink_ghost.png").convert_alpha()
+            # ghost_img = pygame.transform.rotate(ghost_img, self.DIRE[ghost.direction])
+            ghost_img = pygame.transform.scale(ghost_img, (self.cell_size / 2, self.cell_size / 2))
             center = self.center_cell(ghost.x, ghost.y)
             self.screen.blit(ghost_img, ghost_img.get_rect(center=center))
         # pygame.draw.circle(self.screen, "red", center, 6)

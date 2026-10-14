@@ -29,7 +29,14 @@ class Ghost(Entity):
         self.state = GhostStates.CHASE
         self.scared_until = 0
         self.scared_duration = 7000
+        self.recent_cells = deque(maxlen=6)
 
+
+    def move(self, direction: int) -> None:
+        previous = (self.x, self.y)
+        super().move(direction)
+        if previous != (self.x, self.y):
+            self.recent_cells.append((self.x, self.y))
 
     def _get_corner(self) -> tuple[int, int]:
         corner = self.corner
@@ -114,8 +121,12 @@ class Ghost(Entity):
             return None
 
         reverse = OPPOSITE.get(self.direction)
-        forward_neighbors = [n for n in neighbors if n[2] != reverse and (n[0], n[1])]
-        neighbors = forward_neighbors if forward_neighbors else neighbors
+        forward_neighbors = [n for n in neighbors if n[2] != reverse]
+
+        choices = forward_neighbors if forward_neighbors else neighbors
+        no_recent_neighbors = [n for n in choices if (n[0], n[1]) not in self.recent_cells]
+
+        neighbors = no_recent_neighbors if no_recent_neighbors else choices
 
         best_direction = None
         best_distance = -1

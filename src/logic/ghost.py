@@ -1,5 +1,6 @@
 from collections import deque
 from enum import Enum, auto
+import random
 
 from .entities import Entity
 from .maze import DOWN, LEFT, RIGHT, UP, can_move
@@ -15,6 +16,9 @@ class GhostCorners(Enum):
     TOPRIGHT = auto()
     BOTTOMLEFT = auto()
     BOTTOMRIGHT = auto()
+
+
+OPPOSITE = {UP: DOWN, RIGHT: LEFT, DOWN: UP, LEFT: RIGHT}
 
 
 class Ghost(Entity):
@@ -115,7 +119,6 @@ class Ghost(Entity):
 
 
     def _escape_player_direction(self, player_x, player_y) -> int | None:
-        OPPOSITE = {UP: DOWN, RIGHT: LEFT, DOWN: UP, LEFT: RIGHT}
         neighbors = self._get_neighbors()
         if not neighbors:
             return None
@@ -138,9 +141,29 @@ class Ghost(Entity):
 
         return best_direction
 
+    def _get_random_direction(self) -> int | None:
+        neighbors = self._get_neighbors()
+
+        if not neighbors:
+            return None
+
+        forward = [n for n in neighbors if n[2] != OPPOSITE.get(self.direction)]
+        return random.choice(forward or neighbors)[2]
+
     def take_turn(self, player_x: int, player_y: int) -> None:
         if self.state == GhostStates.CHASE:
-            direction = self._find_shortest_path(player_x, player_y)
+            if self.corner == GhostCorners.TOPLEFT:
+                direction = self._find_shortest_path(player_x, player_y)
+
+            elif self.corner == GhostCorners.TOPRIGHT:
+                pass
+
+            elif self.corner == GhostCorners.BOTTOMRIGHT:
+                direction = self._get_random_direction()
+
+            elif self.corner == GhostCorners.BOTTOMLEFT:
+                pass
+
         elif self.state == GhostStates.SCARED:
             direction = self._escape_player_direction(player_x, player_y)
         elif self.state == GhostStates.EATEN:

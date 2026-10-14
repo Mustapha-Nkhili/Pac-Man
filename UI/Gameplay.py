@@ -79,12 +79,12 @@ class Gameplay:
 
     def update(self, events, dt):
         for event in events:
-            # if event.type == pygame.KEYDOWN:
-                # if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
-                #     self.player.lives += 1
-                # if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
-                #     self.level_index += 1
-                #     self.reset()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+                    self.player.lives += 1
+                if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
+                    self.level_index += 1
+                    self.reset()
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
@@ -180,14 +180,14 @@ class Gameplay:
         for button in self.buttons:
             button.draw()
     def cheat_mode(self, events=None):
-        if events:
-            for event in events:
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
-                        self.player.lives += 1
-                    if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
-                        self.level_index += 1
-                self.reset()
+        # if events:
+        #     for event in events:
+        #         if event.type == pygame.KEYDOWN:
+        #             if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+        #                 self.player.lives += 1
+        #             if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
+        #                 self.level_index += 1
+        #         self.reset()
         key = pygame.key.get_pressed()
         if key == pygame.K_y:
             self.player.lives += 1

@@ -5,9 +5,9 @@ import pygame
 from UI.menu import Menu
 
 from UI.Gameplay import Gameplay
-from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
+# from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
 from src.logic.game_state import GameState
-from src.logic.maze import load_maze
+# from src.logic.maze import load_maze
 
 WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/pixel-game/Pixel Game.otf"

@@ -11,22 +11,29 @@ WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/pixel-game/Pixel Game.otf"
 FPS = 60
 
-class Button:
-    COLORS = {
-        "normal": (51, 55, 150),
-        "hover": "#18285C",
-        "pressed": "#919191"
-    }
 
-    def __init__(self, screen, x, y, width, height, font, text, on_click, color=COLORS) -> None:
+class Button:
+    """    
+    """
+    COLORS = {"normal": (51, 55, 150),
+              "hover": "#18285C",
+              "pressed": "#919191"}
+
+    def __init__(
+        self, screen, x, y, width, height, font, text, on_click, color=COLORS
+    ) -> None:
         self.screen = screen
         self.rect = pygame.Rect(x, y, width, height)
         self.on_click = on_click
         self.label = font.render(text, True, "white")
         self.color = color
-    
+
     def handle_event(self, event):
-        if (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and self.rect.collidepoint(event.pos)):
+        if (
+            event.type == pygame.MOUSEBUTTONDOWN
+            and event.button == 1
+            and self.rect.collidepoint(event.pos)
+        ):
             self.on_click()
             return True
         return False
@@ -37,14 +44,15 @@ class Button:
         else:
             state = "normal"
         pygame.draw.rect(self.screen, self.color[state], self.rect)
-        self.screen.blit(self.label, self.label.get_rect(center=self.rect.center))
+        self.screen.blit(self.label,
+                         self.label.get_rect(center=self.rect.center))
+
 
 class Game:
-    CHCOLORS = {
-        "normal": (255, 0, 0),
-        "hover": "#631616",
-        "pressed": "#2B1B1B"
-    }
+    CHCOLORS = {"normal": (255, 0, 0),
+                "hover": "#631616",
+                "pressed": "#2B1B1B"}
+
     def __init__(self, game_state: GameState, config) -> None:
         self.config = config
         pygame.init()
@@ -57,6 +65,7 @@ class Game:
         self.game_state = game_state
         self.load_assets()
         self.load_screens()
+
     @staticmethod
     def images(path, size=None):
         image = pygame.image.load(path).convert_alpha()
@@ -64,69 +73,211 @@ class Game:
 
     def load_assets(self):
         window = (WIDTH, HEIGHT)
-        self.logo = self.images("./img/Pac-Man-Logo-2-2736475491.webp", (350, 90))
+        self.logo = self.images("./img/pacmanlogo", (350, 150))
         self.menu_bg = self.images("img/pause_back.jpg", window)
         self.pause_bg = self.images("img/pause.png", (500, 150))
         self.pause_bg2 = self.images("img/pause_back2.jpg", window)
         self.instructions = self.images("img/Instructions.png", window)
         self.cheat_bg = self.images("img/cheat_screen.png", window)
-        self.pac_images = [self.images(f"img/{name}", (14, 14))
-                           for name in 
-                           ("pacmanopen.png",
-                            "pacmanclosed.png", 
-                            "pacmanmid.png",
-                            "pacmant1.png",
-                            "pacmant2.png",
-                            "pacmant3.png",
-                            "pacmant4.png",
-                            "pacmant5.png",
-                            "pacmant6.png")]
-        self.ghost = self.images("img/my_ghost.png", (14,14))
+        self.pac_images = [
+            self.images(f"img/{name}", (14, 14))
+            for name in (
+                "pacmanopen.png",
+                "pacmanclosed.png",
+                "pacmanmid.png",
+                "pacmant1.png",
+                "pacmant2.png",
+                "pacmant3.png",
+                "pacmant4.png",
+                "pacmant5.png",
+                "pacmant6.png",
+            )
+        ]
+        self.ghost = self.images("img/my_ghost.png", (14, 14))
+
     def load_screens(self):
         screen, font = self.screen, self.font
         switch = lambda state: partial(self.set_state, state)
         self.screens = {
-            "main_menu": Menu(screen, font, self.menu_bg, [
-                Button(screen, 450, 150, 300, 100, font, "Start Game", self.new_game),
-                Button(screen, 450, 275, 300, 100, font, "Highscores", switch("highscores")),
-                Button(screen, 450, 400, 300, 100, font, "Instructions", switch("instructions")),
-                Button(screen, 450, 525, 300, 100, font, "QUIT GAME", self.quit),
-            ], images=[(self.logo, (420, 20))]),
-            "playing": Gameplay(screen, font, self.pac_images, self.config,
-                                [Button(screen, 640, 15, 100, 30, font, "Pause", switch("pause")),
-                                ], game_state=self.game_state),
-            "pause": Menu(screen, font, self.pause_bg2, [
-                Button(screen,700, 360, 150, 50, font, "Resume", switch("playing")),
-                Button(screen, 540, 460, 200, 50, font, "Quit Game", self.quit),
-                Button(screen, 390, 360, 200, 50, font, "main_menu", switch("main_menu")),
-            ], images=[(self.pause_bg, (400, 190))]),
-            "cheat_screen": Menu(screen, font, self.cheat_bg,[
-                                 Button(screen, 400, 650, 200, 50, font, "main_menu", switch("main_menu"))]),
-            "instructions": Menu(screen, font, self.instructions, [
-                Button(screen, 400, 650, 200, 50, font, "main_menu", switch("main_menu")),
-                Button(screen, 650, 650, 250, 50, font, "Cheat_Sheet", switch("cheat_screen"), self.CHCOLORS)
-            ]),
-            "game_over": Menu(screen, font, "black", [
-                Button(screen, 340, 380, 230, 50, font, "Play Again", self.new_game),
-                Button(screen, 650, 380, 230, 50, font, "main_menu", switch("main_menu")),
-            ], title="Game Over", title_pos=(520, 300)),
-            "highscores": HighScoreScreen(screen, font, self.config, [
-                Button(screen, 550, 650, 200, 50, font, "main_menu", switch("main_menu")),
-            ]),
-            "name_entry": Name_entry(screen, font, 0,self.config, )
-
+            "main_menu": Menu(
+                screen,
+                font,
+                self.menu_bg,
+                [
+                    Button(
+                        screen, 450, 150, 300, 100, font,
+                        "Start Game", self.new_game
+                    ),
+                    Button(
+                        screen,
+                        450,
+                        275,
+                        300,
+                        100,
+                        font,
+                        "Highscores",
+                        switch("highscores"),
+                    ),
+                    Button(
+                        screen,
+                        450,
+                        400,
+                        300,
+                        100,
+                        font,
+                        "Instructions",
+                        switch("instructions"),
+                    ),
+                    Button(screen, 450, 525, 300, 100, font,
+                           "QUIT GAME",
+                           self.quit),
+                ],
+                images=[(self.logo, (420, 5))],
+            ),
+            "playing": Gameplay(
+                screen,
+                font,
+                self.pac_images,
+                self.config,
+                [
+                    Button(screen, 640, 15, 100, 30, font,
+                           "Pause",
+                           switch("pause")),
+                ],
+                game_state=self.game_state,
+            ),
+            "pause": Menu(
+                screen,
+                font,
+                self.pause_bg2,
+                [
+                    Button(
+                        screen, 700, 360, 150, 50, font, "Resume",
+                        switch("playing")
+                    ),
+                    Button(screen, 540, 460, 200, 50, font, "Quit Game",
+                           self.quit),
+                    Button(
+                        screen,
+                        390,
+                        360,
+                        200,
+                        50,
+                        font,
+                        "main_menu",
+                        switch("main_menu"),
+                    ),
+                ],
+                images=[(self.pause_bg, (400, 190))],
+            ),
+            "cheat_screen": Menu(
+                screen,
+                font,
+                self.cheat_bg,
+                [
+                    Button(
+                        screen,
+                        400,
+                        650,
+                        200,
+                        50,
+                        font,
+                        "main_menu",
+                        switch("main_menu"),
+                    )
+                ],
+            ),
+            "instructions": Menu(
+                screen,
+                font,
+                self.instructions,
+                [
+                    Button(
+                        screen,
+                        400,
+                        650,
+                        200,
+                        50,
+                        font,
+                        "main_menu",
+                        switch("main_menu"),
+                    ),
+                    Button(
+                        screen,
+                        650,
+                        650,
+                        250,
+                        50,
+                        font,
+                        "Cheat_Sheet",
+                        switch("cheat_screen"),
+                        self.CHCOLORS,
+                    ),
+                ],
+            ),
+            "game_over": Menu(
+                screen,
+                font,
+                "black",
+                [
+                    Button(
+                        screen, 340, 380, 230, 50, font,
+                        "Play Again",
+                        self.new_game
+                    ),
+                    Button(
+                        screen,
+                        650,
+                        380,
+                        230,
+                        50,
+                        font,
+                        "main_menu",
+                        switch("main_menu"),
+                    ),
+                ],
+                title="Game Over",
+                title_pos=(520, 300),
+            ),
+            "highscores": HighScoreScreen(
+                screen,
+                font,
+                self.config,
+                [
+                    Button(
+                        screen,
+                        550,
+                        650,
+                        200,
+                        50,
+                        font,
+                        "main_menu",
+                        switch("main_menu"),
+                    ),
+                ],
+            ),
+            "name_entry": Name_entry(
+                screen,
+                font,
+                0,
+                self.config,
+            ),
         }
+
     def set_state(self, state):
         self.state = state
         if state == "highscores":
-                    self.screens["highscores"].load_data()
+            self.screens["highscores"].load_data()
+
     def new_game(self):
         self.screens["playing"].player = None
         self.screens["playing"].level_index = 0
         self.screens["playing"].reset()
         self.state = "playing"
+
     def quit(self):
         self.running = False
+
     def run(self):
         while self.running:
             dt = self.clock.tick(FPS) / 1000
@@ -142,5 +293,5 @@ class Game:
                     self.screens["highscores"].load_data()
                 self.state = next_state
             self.screens[self.state].draw()
-            pygame.display.flip()    
+            pygame.display.flip()
         pygame.quit()

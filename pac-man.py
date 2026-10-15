@@ -14,8 +14,9 @@ def main():
 
     game_state = GameState()
     config = load_config(sys.argv[1])
-    maze = load_maze(config["level"][1]["width"], config["level"][1]["height"],
-                         config["seed"])
+    maze = load_maze(
+        config["level"][1]["width"], config["level"][1]["height"], config["seed"]
+    )
     Game(game_state, config).run()
 
 

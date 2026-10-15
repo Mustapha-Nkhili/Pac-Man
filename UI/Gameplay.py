@@ -67,17 +67,21 @@ class Gameplay:
         maze = load_maze(level["width"], level["height"], self.config["seed"])
         self.maze_grid = maze["maze"]
         self.qued_move = None
+        midx = len(self.maze_grid[0]) // 2
+        midy = len(self.maze_grid) // 2
         width, hieght = self.screen.get_size()
         if getattr(self, "player", None) is None:
             self.player = Player(
-                x=2,
-                y=2,
+                x=midx,
+                y=midy,
                 lives=self.config["lives"],
                 direction=RIGHT,
                 maze_grid=self.maze_grid,
             )
         else:
             self.player.respawn()
+            self.player.x, self.player.y = midx, midy
+            self.player.old_x, self.player.old_y = midx, midy
             self.player.maze_grid = self.maze_grid
         self.ghost = Ghost(
             direction=RIGHT, maze_grid=self.maze_grid,
@@ -370,6 +374,7 @@ class Name_entry:
                             "w",
                         ) as f:
                             json.dump(highscores, f, indent=4)
+                        self.player_name = ""
                         return "highscores"
                     else:
                         if (event.unicode.isalnum() and

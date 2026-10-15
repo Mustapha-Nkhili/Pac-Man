@@ -9,9 +9,10 @@ import json
 from json import JSONDecodeError
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
-PLAYER_DELAY = 90
+PLAYER_DELAY = 150
+FAST_PLAYER_DELAY = 50
 FRAME_PER_IMAGE = 8
-GHOST_DELAY = 250
+GHOST_DELAY = 600
 class Gameplay:
     KEYS = {
         pygame.K_UP: UP,
@@ -33,6 +34,9 @@ class Gameplay:
         self.buttons = buttons
         self.level_index = 0
         self.game_state = game_state
+        self.speed_bost = False
+        self.invinsible = False
+        self.frozen = False
         # self.player = None
         self.reset()
    
@@ -79,15 +83,17 @@ class Gameplay:
 
     def update(self, events, dt):
         for event in events:
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
-                    self.player.lives += 1
-                if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
-                    self.level_index += 1
-                    self.reset()
+            # if event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
+            #         self.player.lives += 1
+            #     if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
+            #         self.level_index += 1
+            #         self.reset()
             for button in self.buttons:
                 if button.handle_event(event):
                     return None
+        if self.cheat_mode(events):
+            return "name_entry"
         self.time_left = max(self.time_left - dt, 0)
         if self.time_left == 0:
             return "name_entry"
@@ -95,7 +101,8 @@ class Gameplay:
             return "name_entry"
         if len(self.config["level"]) <= self.level_index:
             return "name_entry"
-        self.game_state.check_collisions(self.player, self.ghosts_list, self.config["points_per_ghost"])
+        if not self.invinsible:
+            self.game_state.check_collisions(self.player, self.ghosts_list, self.config["points_per_ghost"])
         # elif self.ghost.x == self.player.x and self.ghost.y == self.player.y and self.ghost.state == GhostStates.SCARED:
         #     self.ghost.x, self.ghost.y = 0 , 0 
         # elif self.ghost.x == self.player.x and self.ghost.y == self.player.y:
@@ -109,13 +116,14 @@ class Gameplay:
         self.animate()
         self.eat_pacgum()
         self.eat_super_pacgum()
-        self.cheat_mode(events)
+        # self.cheat_mode(events)
         now = pygame.time.get_ticks()
-        if now - self.ghost_last_move >= GHOST_DELAY:
+        if not self.frozen and  now - self.ghost_last_move >= GHOST_DELAY:
             for ghost in self.ghosts_list:
                 ghost.take_turn(self.player.x, self.player.y)
             self.ghost_last_move = now
-        if now - self.last_move >= PLAYER_DELAY and self.move_player():
+        player_delay = FAST_PLAYER_DELAY if self.speed_bost else PLAYER_DELAY
+        if now - self.last_move >= player_delay and self.move_player():
             self.last_move = now
         keys = pygame.key.get_pressed()
         for key, direction in self.KEYS.items():
@@ -180,17 +188,24 @@ class Gameplay:
         for button in self.buttons:
             button.draw()
     def cheat_mode(self, events=None):
-        # if events:
-        #     for event in events:
-        #         if event.type == pygame.KEYDOWN:
-        #             if event.key == pygame.K_l and event.mod & pygame.KMOD_SHIFT:
-        #                 self.player.lives += 1
-        #             if event.key == pygame.K_s and event.mod & pygame.KMOD_SHIFT:
-        #                 self.level_index += 1
-        #         self.reset()
-        key = pygame.key.get_pressed()
-        if key == pygame.K_y:
-            self.player.lives += 1
+        if events:
+            for event in events:
+                if event.type != pygame.KEYDOWN or not event.mod & pygame.KMOD_SHIFT:
+                    continue
+                if event.key == pygame.K_l:
+                    self.player.lives += 1
+                elif event.key == pygame.K_n:
+                    self.level_index += 1
+                    if self.level_index >= len(self.config["level"]):
+                        return True
+                    self.reset()
+                elif event.key == pygame.K_i:
+                    self.invinsible = not self.invinsible
+                elif event.key == pygame.K_f:
+                    self.frozen = not self.frozen
+                elif event.key == pygame.K_v:
+                    self.speed_bost = not self.speed_bost
+        return False
     def draw_maze(self):
          for y, n in enumerate(self.maze_grid):
              for x, cell in enumerate(n):
@@ -207,7 +222,8 @@ class Gameplay:
                     pygame.draw.line(self.screen, "white", (left, top), (left, bottom),1)
     def draw_player(self):
         now = pygame.time.get_ticks()
-        t = min((now - self.last_move) / PLAYER_DELAY, 1.0)
+        player_delay = FAST_PLAYER_DELAY if self.speed_bost else PLAYER_DELAY
+        t = min((now - self.last_move) / player_delay, 1.0)
         old_center = self.center_cell(self.player.old_x, self.player.old_y)
         new_center = self.center_cell(self.player.x, self.player.y)
         lerp_x = old_center[0] + (new_center[0] - old_center[0]) * t
@@ -231,11 +247,21 @@ class Gameplay:
             f"Lives: {self.player.lives}",
             f"scores: {self.player.score}",
             f"time_left: {self.time_left:.1f}",
-            f"level: {self.level_index + 1}"
+            f"level: {self.level_index + 1}",
+            f"cheat: {" ".join(self.active_cheats())}"
         ]
         for i, text in enumerate(lines):
             surface = self.font.render(text, True, (255,255,255))
-            self.screen.blit(surface, (20, 30 + i * 60))
+            self.screen.blit(surface, (20, 30 + i * 120))
+    def active_cheats(self):
+        active = []
+        if self.invinsible:
+            active.append("INV")
+        if self.speed_bost:
+            active.append("BOOST")
+        if self.frozen:
+            active.append("FRZ")
+        return active
 class Name_entry:
     def __init__(self, screen, font, score, config) -> None:
         self.screen = screen

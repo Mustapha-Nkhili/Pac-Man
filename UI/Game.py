@@ -66,7 +66,7 @@ class Game:
         window = (WIDTH, HEIGHT)
         self.logo = self.images("./img/Pac-Man-Logo-2-2736475491.webp", (350, 90))
         self.menu_bg = self.images("img/pause_back.jpg", window)
-        self.pause_bg = self.images("img/pause.png", window)
+        self.pause_bg = self.images("img/pause.png", (500, 150))
         self.pause_bg2 = self.images("img/pause_back2.jpg", window)
         self.instructions = self.images("img/Instructions.png", window)
         self.cheat_bg = self.images("img/cheat_screen.png", window)
@@ -74,7 +74,13 @@ class Game:
                            for name in 
                            ("pacmanopen.png",
                             "pacmanclosed.png", 
-                            "pacmanmid.png")]
+                            "pacmanmid.png",
+                            "pacmant1.png",
+                            "pacmant2.png",
+                            "pacmant3.png",
+                            "pacmant4.png",
+                            "pacmant5.png",
+                            "pacmant6.png")]
         self.ghost = self.images("img/my_ghost.png", (14,14))
     def load_screens(self):
         screen, font = self.screen, self.font

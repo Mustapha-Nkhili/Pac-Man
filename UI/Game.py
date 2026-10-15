@@ -13,7 +13,7 @@ FPS = 60
 
 
 class Button:
-    """    
+    """
     """
     COLORS = {"normal": (51, 55, 150),
               "hover": "#18285C",

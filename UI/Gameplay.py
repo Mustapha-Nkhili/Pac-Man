@@ -34,8 +34,9 @@ class Gameplay:
         4: -90,
     }
 
-    def __init__(self, screen, font, pac_images, config,
-                 buttons, game_state) -> None:
+    def __init__(self, screen: pygame.Surface, font: pygame.font.Font,
+                 pac_images: dict[str, pygame.Surface], config: dict,
+                 buttons: list, game_state) -> None:
         self.screen = screen
         self.font = font
         self.pac_images = pac_images
@@ -60,6 +61,7 @@ class Gameplay:
 
     def reset(self):
         if len(self.config["level"]) <= self.level_index:
+            self.config["end_game"] = "Congratulation, Type your name to save your score"
             return "name_entry"
         level = self.config["level"][self.level_index]
         maze = load_maze(level["width"], level["height"], self.config["seed"])
@@ -123,13 +125,17 @@ class Gameplay:
                 if button.handle_event(event):
                     return None
         if self.cheat_mode(events):
+            self.config["end_game"] = self.config["end_game"] = "Congratulation, Type your name to save your score"
             return "name_entry"
         self.time_left = max(self.time_left - dt, 0)
         if self.time_left == 0:
+            self.config["end_game"] = "Oh Oh time is up"
             return "name_entry"
         if self.player.lives <= 0:
+            self.config["end_game"] = "Game is over good luck next time"
             return "name_entry"
         if len(self.config["level"]) <= self.level_index:
+            self.config["end_game"] = "Congratulation, Type your name to save your score"
             return "name_entry"
         if not self.invinsible:
             self.game_state.check_collisions(
@@ -227,6 +233,7 @@ class Gameplay:
                 elif event.key == pygame.K_n:
                     self.level_index += 1
                     if self.level_index >= len(self.config["level"]):
+                        
                         return True
                     self.reset()
                 elif event.key == pygame.K_i:
@@ -274,9 +281,9 @@ class Gameplay:
 
     def draw_ghost(self):
         for ghost in self.ghosts_list:
-            # ghost_img = pygame.image.load("img/pink_ghost.png").convert_alpha()
             ghost_img = pygame.transform.scale(
-                self.ghost_img[ghost.color], (self.cell_size / 2, self.cell_size / 2)
+                self.ghost_img[ghost.color], (self.cell_size / 2,
+                                              self.cell_size / 2)
             )
             center = self.center_cell(ghost.x, ghost.y)
             self.screen.blit(ghost_img, ghost_img.get_rect(center=center))
@@ -374,8 +381,9 @@ class Name_entry:
 
     def draw(self):
         self.screen.fill((28, 28, 28))
+        display_text = self.config.get("end_game", "Enter you name to save your score")
         Game_over = self.font.render(
-            "type your name and press enter to save it to the score board",
+            display_text,
             True,
             "white",
         )
@@ -402,7 +410,6 @@ class HighScoreScreen:
         self.scores_data = []
 
     def load_data(self):
-
         try:
             validating_data = []
             if os.path.exists(self.config.get("highscore_filename",
@@ -464,6 +471,7 @@ class HighScoreScreen:
             button.draw()
         title_surf = self.font.render("Top 10 Scores", True, "Yellow")
         rect = title_surf.get_rect(center=(1280 // 2, 75))
+
         self.screen.blit(title_surf, rect)
 
         starting_y = 200
@@ -472,5 +480,9 @@ class HighScoreScreen:
             text = f"{i + 1}. {entery["name"]}: {entery["score"]} pts"
             text_surf = self.font.render(text, True, "White")
             rect = text_surf.get_rect(center=(1280 // 2, starting_y))
+            # Button(self.screen,390, 360, 200,50, self.font,"main_menu", self.asd())
             self.screen.blit(text_surf, rect)
             starting_y += spacing
+    # @staticmethod
+    # def asd():
+    #     return "main_menu"

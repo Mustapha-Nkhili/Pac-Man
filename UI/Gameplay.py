@@ -5,8 +5,9 @@ import pygame
 from src.logic.entities import Player
 from src.logic.ghost import Ghost, GhostCorners, GhostStates
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
-
-
+import os
+from json import JSONDecodeError
+import json
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 150

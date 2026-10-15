@@ -24,7 +24,8 @@ OPPOSITE = {UP: DOWN, RIGHT: LEFT, DOWN: UP, LEFT: RIGHT}
 class Ghost(Entity):
     def __init__(self, direction: int,
                  maze_grid: list[list[int]],
-                 corner: GhostCorners) -> None:
+                 corner: GhostCorners,
+                 color) -> None:
         self.maze_height = len(maze_grid)
         self.maze_width = len(maze_grid[0])
         self.corner = corner
@@ -34,6 +35,7 @@ class Ghost(Entity):
         self.scared_until = 0
         self.scared_duration = 7000
         self.recent_cells = deque(maxlen=6)
+        self.color = color
 
 
     def move(self, direction: int) -> None:
@@ -151,6 +153,7 @@ class Ghost(Entity):
         return random.choice(forward or neighbors)[2]
 
     def take_turn(self, player_x: int, player_y: int) -> None:
+        direction = None
         if self.state == GhostStates.CHASE:
             if self.corner == GhostCorners.TOPLEFT:
                 direction = self._find_shortest_path(player_x, player_y)

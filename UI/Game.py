@@ -295,3 +295,4 @@ class Game:
             self.screens[self.state].draw()
             pygame.display.flip()
         pygame.quit()
+

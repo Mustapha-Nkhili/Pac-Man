@@ -1,7 +1,7 @@
 import random
 
-from .entities import Player, Ghost, GhostStates
-
+from .entities import Player
+from .ghost import Ghost, GhostStates
 
 ALL_Walls = 15
 

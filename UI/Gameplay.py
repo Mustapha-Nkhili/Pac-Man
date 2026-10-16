@@ -2,8 +2,11 @@ from itertools import cycle
 
 import pygame
 
-from src.logic.entities import Ghost, GhostCorners, GhostStates, Player
+from src.logic.entities import Player
+from src.logic.ghost import Ghost, GhostCorners, GhostStates
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
+
+
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 90

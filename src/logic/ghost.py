@@ -179,7 +179,7 @@ class Ghost(Entity):
                 direction = self._find_shortest_path(player_x, player_y)
 
             elif self.corner == GhostCorners.TOPRIGHT:
-                pass
+                direction = self._get_random_direction()
 
             elif self.corner == GhostCorners.BOTTOMRIGHT:
                 direction = self._get_random_direction()

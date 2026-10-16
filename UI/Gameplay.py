@@ -17,6 +17,16 @@ GHOST_DELAY = 600
 
 
 class Gameplay:
+    """Main gameplay screens: maze, player, ghosts, pacgums and hud.
+
+    Loads each level, moves the player and ghosts, resolves collisions and pacgums eating
+    runs the countdown timer and draws everything, upadte return the name of the next screen when the
+    game next the game ends, otherwise None.
+
+    Atrributes: KEYS: Maps arrow key and WASD to maze direction constants,
+    DIRE: Maps maze direction codes to the rotation in degrees applied to the Pac-man
+    sprite (which faces right by default).
+    """
     KEYS = {
         pygame.K_UP: UP,
         pygame.K_DOWN: DOWN,
@@ -37,6 +47,16 @@ class Gameplay:
     def __init__(self, screen: pygame.Surface, font: pygame.font.Font,
                  pac_images: dict[str, pygame.Surface], config: dict,
                  buttons: list, game_state) -> None:
+        """Create tge gameplay screen and load the first level.
+        
+        Args:
+        screen: Surface everything is drawn on.
+        font: FOnt used for the HUD text.
+        pac_images: Animation frames for the Pac-Man sprite
+        config: parse game configuration (levels, lives, seed, points, pacgum count).
+        buttons: Buttons shown during gameplay
+        game_state: shared game logic object for pacgums placement and collision handling.
+        """
         self.screen = screen
         self.font = font
         self.pac_images = pac_images
@@ -60,6 +80,16 @@ class Gameplay:
         self.reset()
 
     def reset(self):
+        """
+        Load the current level and reset all pre-level state
+
+        Build the maze from the configured seed and level size, creates (or respawn) the player,
+        spawns one ghost per corner restarts timers and the sprite animation, computes the cell size and centering
+        offsets and places pacgums and superpacgums.
+
+        Returns:
+        "name_entry" if there are no level left to load, otherwise None.
+        """
         if len(self.config["level"]) <= self.level_index:
             self.config["end_game"] = "Congratulation, Type your name to save your score"
             return "name_entry"
@@ -138,7 +168,7 @@ class Gameplay:
         """
         Reset the player and ghost to their default place
 
-        Return:
+        Returns:
             None
         """
         midx = len(self.maze_grid[0]) // 2
@@ -149,6 +179,20 @@ class Gameplay:
         self.player.x, self.player.y = midx, midy
         self.player.old_x, self.player.old_y = midx, midy
     def update(self, events, dt):
+        """
+        Advance the game by one frame.
+
+        Handles cheat keys and button clicks, decreases the remaining time cheks end conditions (time out, no lives,
+        no levels left), then resolves collisions, animation, pacgum eating, ghost ,movements, player movements, and queued direction
+        input.
+
+        Args:
+            events: Pygame events collected this frame.
+            dt: Seconds elapsed since the previous frame.
+
+        Returns:
+            "name_entry": when the game is over, otherwise None. 
+        """
         for event in events:
             for button in self.buttons:
                 if button.handle_event(event):
@@ -194,16 +238,20 @@ class Gameplay:
         return None
 
     def draw_pacgums(self):
+        """Draw every remaining regular pacgum as a small white dot."""
         for x, y in self.pacgums:
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 2)
 
     def draw_super_pacgums(self):
+        """Draw every renaining superpagums as a large white dot."""
         for x, y in self.super_pacgums:
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 6)
 
     def eat_pacgum(self):
+        """Advance to the next level if no pacgums remain, then process pacgums
+        collection and scoring for the player's current cell."""
         if len(self.pacgums) <= 0:
             self.level_index += 1
             self.reset()
@@ -212,6 +260,8 @@ class Gameplay:
         )
 
     def eat_super_pacgum(self):
+        """Process superpacgums collection, awrding points and scaring the ghosts
+        that have not been eaten."""
         self.game_state.check_superpacgums_collisions(
             self.player,
             self.super_pacgums,
@@ -221,12 +271,22 @@ class Gameplay:
         )
 
     def animate(self):
+        """Advance the pacman sprite to it's next animation frame every
+        FRAME_PER_IMAGE calls."""
         self.frame_counter += 1
         if self.frame_counter >= FRAME_PER_IMAGE:
             self.current_image = next(self.pac_animation)
             self.frame_counter = 0
 
     def move_player(self):
+        """Move the player one cell, preferring the queued direction.
+        
+        if the queued direction is blocked, keeps moving in the current direction.
+        Updated the player's previous position
+        
+        Returns:
+            True if the player changed cell, False otherwise 
+        """
         if not self.qued_move:
             return None
         before = (self.player.x, self.player.y)
@@ -240,14 +300,30 @@ class Gameplay:
         return (self.player.x, self.player.y) != before
 
     def origin_cell(self, x, y):
+        """Return the top lef screen pixel of a maze cell
+        Args:
+            x: cell column.
+            y: cell row.
+        Returns:
+            (top, left) pixel cirrdubates including the maze offset.
+        """
         return (self.offset_x + x * self.cell_size,
                 self.offset_y + y * self.cell_size)
 
     def center_cell(self, x, y):
+        """Rturn the center screen pixel of a maze cell.
+        Args:
+            x: cell colums.
+            y: cell row.
+        Returns:
+            (centerx, centery) pixel coordinates.
+        """
         left, top = self.origin_cell(x, y)
         return left + self.cell_size // 2, top + self.cell_size // 2
 
     def draw(self):
+        """Draw the whole gameolay screen: backgrounds,
+        maze, pacgums, ghosts, player, HUD and buttons."""
         self.screen.fill(BACKGROUND)
         self.draw_maze()
         self.draw_super_pacgums()
@@ -259,6 +335,7 @@ class Gameplay:
             button.draw()
 
     def cheat_mode(self, events=None):
+        """"""
         if events:
             for event in events:
                 if (event.type != pygame.KEYDOWN or not

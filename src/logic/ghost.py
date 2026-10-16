@@ -19,6 +19,7 @@ class GhostCorners(Enum):
 
 
 OPPOSITE = {UP: DOWN, RIGHT: LEFT, DOWN: UP, LEFT: RIGHT}
+SHY_DISTANCE = 8
 
 
 class Ghost(Entity):
@@ -34,6 +35,7 @@ class Ghost(Entity):
         self.scared_until = 0
         self.scared_duration = 7000
         self.recent_cells = deque(maxlen=6)
+        self._is_retreating = False
 
 
     def move(self, direction: int) -> None:
@@ -150,6 +152,27 @@ class Ghost(Entity):
         forward = [n for n in neighbors if n[2] != OPPOSITE.get(self.direction)]
         return random.choice(forward or neighbors)[2]
 
+
+    def _get_shy_direction(self, player_x: int, player_y: int) -> int | None:
+        distance = abs(self.x - player_x) + abs(self.y - player_y)
+
+        if self._is_retreating:
+            if distance > (SHY_DISTANCE + 2):
+                self._is_retreating = False
+        else:
+            if distance <= SHY_DISTANCE:
+                self._is_retreating = True
+
+        if not self._is_retreating:
+            return self._find_shortest_path(player_x, player_y)
+
+        corner_x, corner_y = self._get_corner()
+        from_corner = abs(self.x - corner_x) + abs(self.y - corner_y)
+        if from_corner <= 4:
+            return self._get_random_direction()
+
+        return self._find_shortest_path(corner_x, corner_y)
+
     def take_turn(self, player_x: int, player_y: int) -> None:
         if self.state == GhostStates.CHASE:
             if self.corner == GhostCorners.TOPLEFT:
@@ -162,7 +185,7 @@ class Ghost(Entity):
                 direction = self._get_random_direction()
 
             elif self.corner == GhostCorners.BOTTOMLEFT:
-                pass
+                direction = self._get_shy_direction(player_x, player_y)
 
         elif self.state == GhostStates.SCARED:
             direction = self._escape_player_direction(player_x, player_y)

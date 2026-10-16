@@ -4,6 +4,7 @@
 - **Target delivery:** 2026-10-18
 - **Team:** mn-khili, maissam
 - **Method:** feature-branch workflow: each feature/milestone below was developed on its own Git branch, then merged into the main branch once it worked.
+- **Tracking:** the milestone table below is the single source of truth, with one status column added as we go (see `03_progress.md`)
 
 ## 1. Milestones
 
@@ -13,7 +14,7 @@
 | M1  | Config           | JSON-with-comments parser (`#`), defaults/clamping, clean error messages, no traceback                                                       | 09-21 | 09-25 | mn-khili | M0         |
 | M2  | Maze integration | Install assigned A-Maze-ing package as-is, and load it                                                                                       | 09-24 | 09-25 | mn-khili | M0         |
 | M3  | Core engine      | Grid model, player movement (arrows/WASD), wall collisions, game loop, basic rendering                                                       | 09-17 | 09-25 | maissam  | M1, M2     |
-| M4  | logic            | Pacgums, super-pacgums in 4 corners, 4 ghosts, ghost AI (chase / flee), edible state, respawn, lives, scoring                                | 09-25 | 10-06 | mn-khili | M3         |
+| M4  | logic            | Pacgums, super-pacgums in 4 corners, 4 ghosts, ghost AI (chase / flee), edible state, respawn, lives, scoring                              | 09-25 | 10-06 | mn-khili | M3         |
 | M5  | Progression      | 10+ levels, level timer, timeout rule, score/lives kept between levels, pause/resume, win/lose conditions                                    | 10-06 | 10-10 | maissam  | M4         |
 | M6  | UI               | Main menu, HUD (score, lives, level, time), pause menu, game over + victory screens, instructions screen                                     | 09-25 | 10-12 | maissam  | M3         |
 | M7  | Highscores       | Persistent top 10, name validation (max 10 chars, alphanumeric + spaces), robust to missing/corrupt file, name entry screen, display in menu | 10-12 | 10-16 | maissam  | M5, M6     |

@@ -4,7 +4,7 @@
 - **Target delivery:** 2026-10-18
 - **Team:** mn-khili, maissam
 - **Method:** feature-branch workflow: each feature/milestone below was developed on its own Git branch, then merged into the main branch once it worked.
-- **Tracking:** the milestone table below is the single source of truth, with one status column added as we go (see `03_progress.md`)
+- **Tracking:** the milestone table below is the single source of truth, with one status column added as we go (see `progress.md`)
 
 ## 1. Milestones
 

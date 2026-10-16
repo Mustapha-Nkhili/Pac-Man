@@ -36,7 +36,8 @@ class Ghost(Entity):
         self.scared_duration = 7000
         self.recent_cells = deque(maxlen=6)
         self.color = color
-
+        self.respawn_until = 0
+        self.respawn_duration = 7000
 
     def move(self, direction: int) -> None:
         previous = (self.x, self.y)
@@ -118,7 +119,11 @@ class Ghost(Entity):
                     neighbors.append((nx, ny, direction))
 
         return neighbors
-
+    def respawn(self) -> None:
+        self.x, self.y = self._get_corner()
+        self.state = GhostStates.CHASE
+        self.respawn_until = 0
+        self.recent_cells.clear()
 
     def _escape_player_direction(self, player_x, player_y) -> int | None:
         neighbors = self._get_neighbors()
@@ -171,11 +176,12 @@ class Ghost(Entity):
             direction = self._escape_player_direction(player_x, player_y)
         elif self.state == GhostStates.EATEN:
             x, y = self._get_corner()
-            direction = self._find_shortest_path(x, y)
+            direction = None
         else:
             direction = None
         if direction is not None:
             self.move(direction)
 
         if self.state == GhostStates.EATEN and (self.x, self.y) == self._get_corner():
-            self.state = GhostStates.CHASE
+            # self.state = GhostStates.CHASE
+            direction = None

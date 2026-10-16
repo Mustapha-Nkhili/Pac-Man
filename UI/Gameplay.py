@@ -122,7 +122,32 @@ class Gameplay:
         self.super_pacgums = self.game_state.place_super_pacgums(
             maze["width"], maze["height"]
         )
+    
+    def update_ghost_state(self, now) -> None:
+        for ghost in self.ghosts_list:
+            if ghost.state == GhostStates.EATEN:
+                if ghost.respawn_until == 0:
+                    ghost.x, ghost.y = ghost._get_corner()
+                    ghost.respawn_until = now + ghost.respawn_duration
+                elif now >= ghost.respawn_until:
+                    ghost.respawn()
+            elif ghost.state == GhostStates.SCARED and now >= ghost.scared_until:
+                ghost.state = GhostStates.CHASE
+    
+    def reset_after_death(self) -> None:
+        """
+        Reset the player and ghost to their default place
 
+        Return:
+            None
+        """
+        midx = len(self.maze_grid[0]) // 2
+        midy = len(self.maze_grid) // 2
+        for ghost in self.ghosts_list:
+            ghost.respawn()
+        self.qued_move = None
+        self.player.x, self.player.y = midx, midy
+        self.player.old_x, self.player.old_y = midx, midy
     def update(self, events, dt):
         for event in events:
             for button in self.buttons:
@@ -141,10 +166,15 @@ class Gameplay:
         if len(self.config["level"]) <= self.level_index:
             self.config["end_game"] = "Congratulation, Type your name to save your score"
             return "name_entry"
+        now = pygame.time.get_ticks()
         if not self.invinsible:
+            lives = self.player.lives
             self.game_state.check_collisions(
                 self.player, self.ghosts_list, self.config["points_per_ghost"]
             )
+            if self.player.lives < lives:
+                self.reset_after_death()
+        self.update_ghost_state(now)
         self.animate()
         self.eat_pacgum()
         self.eat_super_pacgum()
@@ -197,6 +227,8 @@ class Gameplay:
             self.frame_counter = 0
 
     def move_player(self):
+        if not self.qued_move:
+            return None
         before = (self.player.x, self.player.y)
         self.player.old_x, self.player.old_y = before
         if self.qued_move:
@@ -285,6 +317,8 @@ class Gameplay:
 
     def draw_ghost(self):
         for ghost in self.ghosts_list:
+            if ghost.state == GhostStates.EATEN:
+                continue
             ghost_img = pygame.transform.scale(
                 self.ghost_img[ghost.color], (self.cell_size / 2,
                                               self.cell_size / 2)
@@ -299,6 +333,7 @@ class Gameplay:
             f"time_left: {self.time_left:.1f}",
             f"level: {self.level_index + 1}",
             f"cheat: {" ".join(self.active_cheats())}",
+            f"Ghost_state: {" ".join(self.active_states())}",
         ]
         for i, text in enumerate(lines):
             surface = self.font.render(text, True, (255, 255, 255))
@@ -313,7 +348,16 @@ class Gameplay:
         if self.frozen:
             active.append("FRZ")
         return active
-
+    def active_states(self):
+        active = []
+        for ghost in self.ghosts_list:
+            if ghost.state == GhostStates.SCARED:
+                if ("Scared") not in active:
+                    active.append("Scared")
+            if ghost.state == GhostStates.CHASE:
+                if "Chase" not in active:
+                    active.append("Chase")
+        return active
 
 class Name_entry:
     def __init__(self, screen, font, score, config) -> None:
@@ -478,16 +522,11 @@ class HighScoreScreen:
         rect = title_surf.get_rect(center=(1280 // 2, 75))
 
         self.screen.blit(title_surf, rect)
-
         starting_y = 200
         spacing = 40
         for i, entery in enumerate(self.scores_data):
             text = f"{i + 1}. {entery["name"]}: {entery["score"]} pts"
             text_surf = self.font.render(text, True, "White")
             rect = text_surf.get_rect(center=(1280 // 2, starting_y))
-            # Button(self.screen,390, 360, 200,50, self.font,"main_menu", self.asd())
             self.screen.blit(text_surf, rect)
             starting_y += spacing
-    # @staticmethod
-    # def asd():
-    #     return "main_menu"

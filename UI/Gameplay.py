@@ -335,7 +335,7 @@ class Gameplay:
             button.draw()
 
     def cheat_mode(self, events=None):
-        """"""
+        """Apply the cheat bound to a pressed key"""
         if events:
             for event in events:
                 if (event.type != pygame.KEYDOWN or not
@@ -358,6 +358,10 @@ class Gameplay:
         return False
 
     def draw_maze(self):
+        """Draw the maze walls.
+        Each cell value is a bitmask: 1 = top wall, 2 = right wall,
+        4 = bottom wall, 8 left wall.
+        """
         for y, n in enumerate(self.maze_grid):
             for x, cell in enumerate(n):
                 left, top = self.origin_cell(x, y)
@@ -380,6 +384,9 @@ class Gameplay:
                     )
 
     def draw_player(self):
+        """Draw the rotated pacman sprite,
+        interpolated between the previous and current cell
+        base on time since the last move."""
         now = pygame.time.get_ticks()
         player_delay = FAST_PLAYER_DELAY if self.speed_bost else PLAYER_DELAY
         t = min((now - self.last_move) / player_delay, 1.0)
@@ -393,6 +400,7 @@ class Gameplay:
         self.screen.blit(img, img.get_rect(center=(lerp_x, lerp_y)))
 
     def draw_ghost(self):
+        """Draw every ghost centered on it's current cell."""
         for ghost in self.ghosts_list:
             if ghost.state == GhostStates.EATEN:
                 continue
@@ -404,6 +412,8 @@ class Gameplay:
             self.screen.blit(ghost_img, ghost_img.get_rect(center=center))
 
     def draw_hud(self):
+        """Draw lives, score, remaining time and current level,
+        active cheats and ghosts states on the left."""
         lines = [
             f"Lives: {self.player.lives}",
             f"scores: {self.player.score}",
@@ -417,6 +427,11 @@ class Gameplay:
             self.screen.blit(surface, (20, 30 + i * 120))
 
     def active_cheats(self):
+        """Keep track of the active cheats.
+        
+        Returns:
+            A list of the active cheats.
+        """
         active = []
         if self.invinsible:
             active.append("INV")
@@ -426,6 +441,11 @@ class Gameplay:
             active.append("FRZ")
         return active
     def active_states(self):
+        """Keep track of the active ghosts states.
+        
+        Returns:
+            A list of the active ghosts states.
+        """
         active = []
         for ghost in self.ghosts_list:
             if ghost.state == GhostStates.SCARED:
@@ -437,7 +457,22 @@ class Gameplay:
         return active
 
 class Name_entry:
+    """
+    Screen where the player types a name to save their score.
+
+    Acceps up to 10 alphanumeruc characters and saves the entry to the
+    highscore file when Enter is pressed.
+    """
     def __init__(self, screen, font, score, config) -> None:
+        """
+        Create the name entry screen.
+
+        Args:
+            screen: Surface to draw on.
+            font: Font used for all text.
+            score: Final score to display and save.
+            config: Prased game configuration.
+        """
         self.screen = screen
         self.font = font
         self.player_name = ""
@@ -445,6 +480,20 @@ class Name_entry:
         self.config = config
 
     def update(self, events, dt):
+        """
+        Handle typing and saving.
+
+        Backspace deltes the last character.
+        Enter saves the entry (an empty name defaults to "Player"),
+        which is validated, sortedby score and trimmed to the top 10.
+        
+        Args:
+            events: Pygame events collected this frame.
+            dt: seconds elapsed since the previous frame
+        
+        Returns: "highscores" after a successfull save, otherwise None.
+        Nothign is saved if the file is too large, malformed or unreadable.
+        """
         try:
             for event in events:
                 if event.type == pygame.KEYDOWN:
@@ -506,6 +555,7 @@ class Name_entry:
         return None
 
     def draw(self):
+        """Draw the prompt, the achieved score and name input box."""
         self.screen.fill((28, 28, 28))
         display_text = self.config.get("end_game", "Enter you name to save your score")
         Game_over = self.font.render(
@@ -528,7 +578,16 @@ class Name_entry:
 
 
 class HighScoreScreen:
+    """Screen displaying the top 10 saved scores."""
     def __init__(self, screen, font, config, buttons) -> None:
+        """Create the highscore screen.
+        
+        Args:
+            screen: Surface to draw on.
+            font: Font used for all text.
+            config: parse game configuration.
+            buttons: Buttons shown on the screen.
+        """
         self.screen = screen
         self.font = font
         self.config = config
@@ -536,6 +595,12 @@ class HighScoreScreen:
         self.scores_data = []
 
     def load_data(self):
+        """
+        Load and valudate scores from the highscore file.
+
+        Does noting if the file is larger than 100kb or the json is not a list.
+        Read and parse errors are caught and reported.
+        """
         try:
             validating_data = []
             if os.path.exists(self.config.get("highscore_filename",
@@ -565,6 +630,15 @@ class HighScoreScreen:
 
     @staticmethod
     def dig(validating_data):
+        """Recursively collect valid score entries from parse JSON.
+
+        Accepts a dict or an arbitrily nested list.
+        an entry is accepted when it has a string name and no negative
+        integer "score", Everything else is ignored.
+
+        Returns:
+            A flat list of the valid entry dicts.
+        """
         valid_data = []
         if isinstance(validating_data, dict):
             if (
@@ -585,6 +659,15 @@ class HighScoreScreen:
         return valid_data
 
     def update(self, events, dt):
+        """
+        Forward events to the buttons.
+
+        Args:
+            events: Pygame events collected this frame.
+            dt: seconds elapsed since the previous frame
+        Returns:
+            "main_menu" if a button was clicked, otherwise None
+        """
         for event in events:
             for button in self.button:
                 if button.handle_event(event):
@@ -592,6 +675,7 @@ class HighScoreScreen:
         return
 
     def draw(self):
+        """Draw the title, the buttons and the ranked list of scores."""
         self.screen.fill("black")
         for button in self.button:
             button.draw()

@@ -57,7 +57,7 @@ class GameState:
         player: Player,
         pacgums: set[tuple[int, int]],
         points_per_pacgum: int,
-    ):
+    ) -> None:
         if (player.x, player.y) in pacgums:
             pacgums.remove((player.x, player.y))
             player.score += points_per_pacgum

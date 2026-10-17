@@ -1,7 +1,7 @@
 import json
-from typing import Any
+from typing import Any, TypeGuard
 
-DEFAULTS = {
+DEFAULTS: dict[str, Any] = {
     "highscore_filename": "highscores.json",
     "seed": 42,
     "level_max_time": 90,
@@ -42,7 +42,7 @@ def remove_comments(text: str) -> str:
     return "\n".join(cleaned_txt)
 
 
-def is_valid_int(value: Any) -> bool:
+def is_valid_int(value: Any) -> TypeGuard[int]:
     """Check whether a value is an int, excluding bool
     cause it a subtype of int
 
@@ -55,7 +55,7 @@ def is_valid_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
 
 
-def is_valid_level_list(value: list) -> bool:
+def is_valid_level_list(value: list[Any]) -> bool:
     """Check whether a value is a valid list of levels.
 
     Args:
@@ -82,7 +82,7 @@ def is_valid_level_list(value: list) -> bool:
     return True
 
 
-def load_config(config_path: str) -> dict:
+def load_config(config_path: str) -> dict[str, Any]:
     """Load and validate the config file, falling back to safe defaults
     in any missing key or wrong value.
 

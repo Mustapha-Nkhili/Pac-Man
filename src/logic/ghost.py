@@ -35,7 +35,7 @@ class Ghost(Entity):
         self.state = GhostStates.CHASE
         self.scared_until = 0
         self.scared_duration = 7000
-        self.recent_cells = deque(maxlen=6)
+        self.recent_cells: deque[tuple[int, int]] = deque(maxlen=6)
         self._is_retreating = False
 
     def move(self, direction: int) -> None:
@@ -59,7 +59,10 @@ class Ghost(Entity):
             return (0, 0)
 
     def _get_unvisited_neighbors(
-        self, x: int, y: int, came_from: dict[tuple, tuple]
+        self,
+        x: int,
+        y: int,
+        came_from: dict[tuple[int, int], tuple[tuple[int, int], int] | None],
     ) -> list[tuple[int, int, int]]:
         neighbors = []
 
@@ -76,7 +79,9 @@ class Ghost(Entity):
 
     def _find_shortest_path(self, player_x: int, player_y: int) -> int | None:
         queue: deque[tuple[int, int]] = deque([(self.x, self.y)])
-        came_from = {}
+        came_from: dict[
+            tuple[int, int], tuple[tuple[int, int], int] | None
+        ] = {}
         came_from[(self.x, self.y)] = None
 
         while queue:
@@ -87,10 +92,12 @@ class Ghost(Entity):
                 direction = None
 
                 while came_from[current] is not None:
-                    prev_cell, prev_direction = came_from[current]
-                    if prev_cell == (self.x, self.y):
-                        direction = prev_direction
-                    current = prev_cell
+                    entry = came_from[current]
+                    if entry is not None:
+                        prev_cell, prev_direction = entry
+                        if prev_cell == (self.x, self.y):
+                            direction = prev_direction
+                        current = prev_cell
 
                 return direction
 
@@ -101,6 +108,8 @@ class Ghost(Entity):
                 if can_move(self.maze_grid, y, x, direction):
                     came_from[(next_x, next_y)] = ((x, y), direction)
                     queue.append((next_x, next_y))
+
+        return None
 
     def _get_neighbors(self) -> list[tuple[int, int, int]]:
         x = self.x
@@ -120,7 +129,9 @@ class Ghost(Entity):
 
         return neighbors
 
-    def _escape_player_direction(self, player_x, player_y) -> int | None:
+    def _escape_player_direction(
+        self, player_x: int, player_y: int
+    ) -> int | None:
         neighbors = self._get_neighbors()
         if not neighbors:
             return None

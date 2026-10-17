@@ -99,19 +99,20 @@ class Gameplay:
         self.qued_move = None
         midx = len(self.maze_grid[0]) // 2
         midy = len(self.maze_grid) // 2
+        safe_x, safe_y = self.find_open_cell(midx, midy) 
         width, hieght = self.screen.get_size()
         if getattr(self, "player", None) is None:
             self.player = Player(
-                x=midx,
-                y=midy,
+                x=safe_x,
+                y=safe_y,
                 lives=self.config["lives"],
                 direction=RIGHT,
                 maze_grid=self.maze_grid,
             )
         else:
             self.player.respawn()
-            self.player.x, self.player.y = midx, midy
-            self.player.old_x, self.player.old_y = midx, midy
+            self.player.x, self.player.y = safe_x, safe_y
+            self.player.old_x, self.player.old_yF = safe_x, safe_y
             self.player.maze_grid = self.maze_grid
         self.ghost = Ghost(
             direction=RIGHT, maze_grid=self.maze_grid,
@@ -153,6 +154,32 @@ class Gameplay:
             maze["width"], maze["height"]
         )
     
+    def find_open_cell(self, midx, midy):
+        """
+        Find the valid center spawn cell.
+        
+        Args:
+            midx: horizontal middle cell
+            midy: vertical middle cell
+        
+        Returns:
+            A set of the valid spawn cords.
+        """
+        queue = [(midx, midy)]
+        visited = set([(midx, midy)])
+        while queue:
+            curr_x, curr_y = queue.pop(0)
+            if self.maze_grid[curr_y][curr_x] < 15:
+                return (curr_x, curr_y)
+            for dx, dy in [(0, -1), (-1, 0), (1, 0), (0,1)]:
+                nx, ny = curr_x + dx, curr_y + dy
+                if 0 <= nx < len(self.maze_grid[0]) and 0 <= ny < len(self.maze_grid):
+                    if (nx, ny) not in visited:
+                        # print(visited)
+                        visited.add((nx, ny))
+                        queue.append((nx, ny))
+        return (midx, midy)
+    
     def update_ghost_state(self, now) -> None:
         for ghost in self.ghosts_list:
             if ghost.state == GhostStates.EATEN:
@@ -173,11 +200,12 @@ class Gameplay:
         """
         midx = len(self.maze_grid[0]) // 2
         midy = len(self.maze_grid) // 2
+        safe_x, safe_y = self.find_open_cell(midx, midy)
         for ghost in self.ghosts_list:
             ghost.respawn()
         self.qued_move = None
-        self.player.x, self.player.y = midx, midy
-        self.player.old_x, self.player.old_y = midx, midy
+        self.player.x, self.player.y = safe_x, safe_y
+        self.player.old_x, self.player.old_y = safe_x, safe_y
     def update(self, events, dt):
         """
         Advance the game by one frame.
@@ -358,7 +386,8 @@ class Gameplay:
         return False
 
     def draw_maze(self):
-        """Draw the maze walls.
+        """
+        Draw the maze walls.
         Each cell value is a bitmask: 1 = top wall, 2 = right wall,
         4 = bottom wall, 8 left wall.
         """

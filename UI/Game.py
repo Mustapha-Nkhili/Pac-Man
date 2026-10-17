@@ -21,20 +21,20 @@ class Button:
     def __init__(
         self, screen, x, y, width, height, font, text, on_click, color=COLORS
     ) -> None:
-    """
-    Create a button.
+        """
+        Create a button.
     
-    Args:
-        screen: Surface to draw on.
-        x: left position in pixels.
-        y: top position in pixels.
-        width: button witdth in pixels.
-        height: button height in pixels.
-        font: Font usde to render the label.
-        text: label text.
-        on_click: callable invoked when the button is clicked.
-        color: button color.
-    """
+        Args:
+            screen: Surface to draw on.
+            x: left position in pixels.
+            y: top position in pixels.
+            width: button witdth in pixels.
+            height: button height in pixels.
+            font: Font usde to render the label.
+            text: label text.
+            on_click: callable invoked when the button is clicked.
+            color: button color.
+        """
         self.screen = screen
         self.rect = pygame.Rect(x, y, width, height)
         self.on_click = on_click

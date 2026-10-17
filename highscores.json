@@ -1,5 +1,9 @@
 [
     {
+        "name": "yes",
+        "score": 6350
+    },
+    {
         "name": "hello",
         "score": 2650
     },
@@ -34,9 +38,5 @@
     {
         "name": "asdlajslkd",
         "score": 170
-    },
-    {
-        "name": "Player",
-        "score": 0
     }
 ]

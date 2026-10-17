@@ -17,18 +17,18 @@ class Menu:
         title_pos=(0, 0),
         title_color="white",
     ) -> None:
-    """
-    Create a menu screen
-    
-    Args:
-        screen: surface to draw on.
-        font: Font used to render the title.
-        background: A Surface to blit, or a color to fill with.
-        button: list of Button objects.
-        images = images to draw over the background.
-        title_pos: top_left position of the title.
-        title_color: color of the title text. 
-    """
+        """
+        Create a menu screen
+        
+        Args:
+            screen: surface to draw on.
+            font: Font used to render the title.
+            background: A Surface to blit, or a color to fill with.
+            button: list of Button objects.
+            images = images to draw over the background.
+            title_pos: top_left position of the title.
+            title_color: color of the title text. 
+        """
         self.screen = screen
         self.background = background
         self.button = button

@@ -2,7 +2,9 @@ from .maze import DOWN, LEFT, RIGHT, UP, can_move
 
 
 class Entity:
-    def __init__(self, x: int, y: int, direction: int, maze_grid: list[list[int]]) -> None:
+    def __init__(
+        self, x: int, y: int, direction: int, maze_grid: list[list[int]]
+    ) -> None:
         self.x = x
         self.y = y
         self.direction = direction
@@ -24,9 +26,14 @@ class Entity:
 
 
 class Player(Entity):
-    def __init__(self, x: int, y: int, lives: int,
-                 direction: int,
-                 maze_grid: list[list[int]]) -> None:
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        lives: int,
+        direction: int,
+        maze_grid: list[list[int]],
+    ) -> None:
         super().__init__(x, y, direction, maze_grid)
         self.score = 0
         self.lives = lives

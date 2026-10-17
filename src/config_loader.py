@@ -2,25 +2,26 @@ import json
 from typing import Any
 
 DEFAULTS = {
-  "highscore_filename": "highscores.json",
-  "seed": 42,
-  "level_max_time": 90,
-  "lives": 3,
-  "pacgum": 42,
-  "points_per_pacgum": 10,
-  "points_per_super_pacgum": 50,
-  "points_per_ghost": 200,
-  "level": [{"width": 15, "height": 15},
-            {"width": 20, "height": 20},
-            {"width": 30, "height": 30},
-            {"width": 40, "height": 40},
-            {"width": 55, "height": 55},
-            {"width": 50, "height": 50},
-            {"width": 45, "height": 45},
-            {"width": 40, "height": 40},
-            {"width": 55, "height": 55},
-            {"width": 50, "height": 50},
-            ]
+    "highscore_filename": "highscores.json",
+    "seed": 42,
+    "level_max_time": 90,
+    "lives": 3,
+    "pacgum": 42,
+    "points_per_pacgum": 10,
+    "points_per_super_pacgum": 50,
+    "points_per_ghost": 200,
+    "level": [
+        {"width": 15, "height": 15},
+        {"width": 20, "height": 20},
+        {"width": 30, "height": 30},
+        {"width": 40, "height": 40},
+        {"width": 55, "height": 55},
+        {"width": 50, "height": 50},
+        {"width": 45, "height": 45},
+        {"width": 40, "height": 40},
+        {"width": 55, "height": 55},
+        {"width": 50, "height": 50},
+    ],
 }
 
 
@@ -101,8 +102,10 @@ def load_config(config_path: str) -> dict:
         return DEFAULTS.copy()
 
     if not isinstance(data, dict):
-        print("Config Error: the config file must be a JSON object, "
-              "using defaults")
+        print(
+            "Config Error: the config file must be a JSON object, "
+            "using defaults"
+        )
         return DEFAULTS.copy()
 
     config = DEFAULTS.copy()
@@ -117,17 +120,22 @@ def load_config(config_path: str) -> dict:
             if is_valid_int(value) and value > 0:
                 config[key] = value
             else:
-                print(f"Config Error: {key} must be a number > 0, "
-                      "using default")
+                print(
+                    f"Config Error: {key} must be a number > 0, using default"
+                )
                 config[key] = default
 
-        elif key in {"points_per_pacgum", "points_per_super_pacgum",
-                     "points_per_ghost"}:
+        elif key in {
+            "points_per_pacgum",
+            "points_per_super_pacgum",
+            "points_per_ghost",
+        }:
             if is_valid_int(value) and value >= 0:
                 config[key] = value
             else:
-                print(f"Config Error: {key} must be a number >= 0, "
-                      "using default")
+                print(
+                    f"Config Error: {key} must be a number >= 0, using default"
+                )
                 config[key] = default
         elif key == "seed":
             if is_valid_int(value):
@@ -139,15 +147,19 @@ def load_config(config_path: str) -> dict:
             if isinstance(value, str) and value and value.endswith(".json"):
                 config[key] = value
             else:
-                print(f"Config Error: {key} must be a non-empty "
-                      ".json file, using default")
+                print(
+                    f"Config Error: {key} must be a non-empty "
+                    ".json file, using default"
+                )
                 config[key] = default
         elif key == "level":
             if is_valid_level_list(value):
                 config[key] = value
             else:
-                print("Config Error: must be a list of 10 items of "
-                      "{width, height} dict, using default")
+                print(
+                    "Config Error: must be a list of 10 items of "
+                    "{width, height} dict, using default"
+                )
                 config[key] = default
 
     return config

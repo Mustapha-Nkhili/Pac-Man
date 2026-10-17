@@ -11,6 +11,7 @@ class GhostStates(Enum):
     SCARED = auto()
     EATEN = auto()
 
+
 class GhostCorners(Enum):
     TOPLEFT = auto()
     TOPRIGHT = auto()
@@ -23,9 +24,9 @@ SHY_DISTANCE = 8
 
 
 class Ghost(Entity):
-    def __init__(self, direction: int,
-                 maze_grid: list[list[int]],
-                 corner: GhostCorners) -> None:
+    def __init__(
+        self, direction: int, maze_grid: list[list[int]], corner: GhostCorners
+    ) -> None:
         self.maze_height = len(maze_grid)
         self.maze_width = len(maze_grid[0])
         self.corner = corner
@@ -36,7 +37,6 @@ class Ghost(Entity):
         self.scared_duration = 7000
         self.recent_cells = deque(maxlen=6)
         self._is_retreating = False
-
 
     def move(self, direction: int) -> None:
         previous = (self.x, self.y)
@@ -58,7 +58,9 @@ class Ghost(Entity):
         else:
             return (0, 0)
 
-    def _get_unvisited_neighbors(self, x: int, y: int, came_from: dict[tuple, tuple]) -> list[tuple[int, int, int]]:
+    def _get_unvisited_neighbors(
+        self, x: int, y: int, came_from: dict[tuple, tuple]
+    ) -> list[tuple[int, int, int]]:
         neighbors = []
 
         if y - 1 >= 0 and (x, y - 1) not in came_from:
@@ -72,7 +74,6 @@ class Ghost(Entity):
 
         return neighbors
 
-
     def _find_shortest_path(self, player_x: int, player_y: int) -> int | None:
         queue: deque[tuple[int, int]] = deque([(self.x, self.y)])
         came_from = {}
@@ -80,7 +81,7 @@ class Ghost(Entity):
 
         while queue:
             x, y = queue.popleft()
- 
+
             if (x, y) == (player_x, player_y):
                 current = (player_x, player_y)
                 direction = None
@@ -109,7 +110,7 @@ class Ghost(Entity):
             (x, y - 1, UP),
             (x + 1, y, RIGHT),
             (x, y + 1, DOWN),
-            (x - 1, y, LEFT)
+            (x - 1, y, LEFT),
         ]
 
         for nx, ny, direction in directions:
@@ -118,7 +119,6 @@ class Ghost(Entity):
                     neighbors.append((nx, ny, direction))
 
         return neighbors
-
 
     def _escape_player_direction(self, player_x, player_y) -> int | None:
         neighbors = self._get_neighbors()
@@ -129,7 +129,9 @@ class Ghost(Entity):
         forward_neighbors = [n for n in neighbors if n[2] != reverse]
 
         choices = forward_neighbors if forward_neighbors else neighbors
-        no_recent_neighbors = [n for n in choices if (n[0], n[1]) not in self.recent_cells]
+        no_recent_neighbors = [
+            n for n in choices if (n[0], n[1]) not in self.recent_cells
+        ]
 
         neighbors = no_recent_neighbors if no_recent_neighbors else choices
 
@@ -149,9 +151,10 @@ class Ghost(Entity):
         if not neighbors:
             return None
 
-        forward = [n for n in neighbors if n[2] != OPPOSITE.get(self.direction)]
+        forward = [
+            n for n in neighbors if n[2] != OPPOSITE.get(self.direction)
+        ]
         return random.choice(forward or neighbors)[2]
-
 
     def _get_shy_direction(self, player_x: int, player_y: int) -> int | None:
         distance = abs(self.x - player_x) + abs(self.y - player_y)
@@ -197,5 +200,8 @@ class Ghost(Entity):
         if direction is not None:
             self.move(direction)
 
-        if self.state == GhostStates.EATEN and (self.x, self.y) == self._get_corner():
+        if (
+            self.state == GhostStates.EATEN
+            and (self.x, self.y) == self._get_corner()
+        ):
             self.state = GhostStates.CHASE

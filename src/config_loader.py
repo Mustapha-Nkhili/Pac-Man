@@ -25,6 +25,10 @@ DEFAULTS: dict[str, Any] = {
 }
 
 
+class ConfigError(Exception):
+    pass
+
+
 class ConfigLoader:
     def _remove_comments(self, text: str) -> str:
         """Strip comment lines from raw config text.
@@ -98,7 +102,9 @@ class ConfigLoader:
             with open(config_path) as file:
                 raw = self._remove_comments(file.read())
             data = json.loads(raw)
-        except (OSError, json.JSONDecodeError) as e:
+        except OSError as e:
+            raise ConfigError(f"Config Error: {e}")
+        except json.JSONDecodeError as e:
             print(f"Config Error: {e}, using defaults")
             return DEFAULTS.copy()
 

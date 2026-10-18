@@ -1,6 +1,6 @@
 import sys
 
-from src.config_loader import load_config
+from src.config_loader import ConfigLoader
 from src.logic.game_state import GameState
 from UI.Game import Game
 
@@ -12,7 +12,7 @@ def main():
         sys.exit(1)
 
     game_state = GameState()
-    config = load_config(sys.argv[1])
+    config = ConfigLoader().load_config(sys.argv[1])
     Game(game_state, config).run()
 
 

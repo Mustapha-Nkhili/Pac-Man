@@ -7,7 +7,7 @@ from UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
 from UI.menu import Menu
 
 WIDTH, HEIGHT = 1280, 720
-FONT_PATH = "img/pixel-game/Pixel Game.otf"
+FONT_PATH = "img/Pixel Game.otf"
 FPS = 60
 
 
@@ -149,7 +149,7 @@ class Game:
                 "pacmant6.png",
             )
         ]
-        self.ghost = self.images("img/my_ghost.png", (14, 14))
+        # self.ghost = self.images("img/my_ghost.png", (14, 14))
 
     def switch(self, state):
         """Create a callable that set the application state to `state`

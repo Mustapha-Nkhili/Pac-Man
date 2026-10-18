@@ -6,6 +6,7 @@ from UI.Game import Game
 
 
 def main():
+    """Reads the configuration file and starts the game."""
     try:
         if len(sys.argv) != 2:
             print("Error: Invalid number of arguments.", file=sys.stderr)

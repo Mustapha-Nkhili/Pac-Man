@@ -2,10 +2,9 @@ from functools import partial
 
 import pygame
 
-from UI.menu import Menu
-
-from UI.Gameplay import Gameplay, Name_entry, HighScoreScreen
 from src.logic.game_state import GameState
+from UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
+from UI.menu import Menu
 
 WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/pixel-game/Pixel Game.otf"
@@ -14,16 +13,19 @@ FPS = 60
 
 class Button:
     """Clickable rectangular button with hove and pressed colors."""
-    COLORS = {"normal": (51, 55, 150),
-              "hover": "#18285C",
-              "pressed": "#919191"}
+
+    COLORS = {
+        "normal": (51, 55, 150),
+        "hover": "#18285C",
+        "pressed": "#919191"
+        }
 
     def __init__(
         self, screen, x, y, width, height, font, text, on_click, color=COLORS
     ) -> None:
         """
         Create a button.
-    
+
         Args:
             screen: Surface to draw on.
             x: left position in pixels.
@@ -44,10 +46,10 @@ class Button:
     def handle_event(self, event):
         """
         Run the click callback in a left mouse press inside the button.
-        
+
         Args:
             event: Pygame event to inspect.
-        
+
         Returns:
             True if the button was clicked, otherwise False.
         """
@@ -69,8 +71,8 @@ class Button:
         else:
             state = "normal"
         pygame.draw.rect(self.screen, self.color[state], self.rect)
-        self.screen.blit(self.label,
-                         self.label.get_rect(center=self.rect.center))
+        self.screen.blit(self.label, self.label.get_rect(
+                        center=self.rect.center))
 
 
 class Game:
@@ -80,13 +82,15 @@ class Game:
 
     Attributes:
         CHCOLORS: red color set used for the cheat sheet button.
-  
-    """
-    CHCOLORS = {"normal": (255, 0, 0),
-                "hover": "#631616",
-                "pressed": "#2B1B1B"}
 
-    def __init__(self, game_state: GameState, config) -> None:  
+    """
+
+    CHCOLORS = {
+        "normal": (255, 0, 0),
+        "hover": "#631616",
+        "pressed": "#2B1B1B"}
+
+    def __init__(self, game_state: GameState, config) -> None:
         """
         Initialize pyage, create the window and font, laod assets and screens.
 
@@ -147,10 +151,21 @@ class Game:
         ]
         self.ghost = self.images("img/my_ghost.png", (14, 14))
 
+    def switch(self, state):
+        """Create a callable that set the application state to `state`
+
+        Args:
+            state : the state to set
+
+        Returns:
+            a partial function that calls self.set_state(state) when invoked.
+        """
+        return partial(self.set_state, state)
+
     def load_screens(self):
         """Build every screen and store then by name in self.screens."""
         screen, font = self.screen, self.font
-        switch = lambda state: partial(self.set_state, state)
+        # switch = lambda state: partial(self.set_state, state)
         self.screens = {
             "main_menu": Menu(
                 screen,
@@ -158,8 +173,14 @@ class Game:
                 self.menu_bg,
                 [
                     Button(
-                        screen, 450, 150, 300, 100, font,
-                        "Start Game", self.new_game
+                        screen,
+                        450,
+                        150,
+                        300,
+                        100,
+                        font,
+                        "Start Game",
+                        self.new_game
                     ),
                     Button(
                         screen,
@@ -169,7 +190,7 @@ class Game:
                         100,
                         font,
                         "Highscores",
-                        switch("highscores"),
+                        self.switch("highscores"),
                     ),
                     Button(
                         screen,
@@ -179,11 +200,11 @@ class Game:
                         100,
                         font,
                         "Instructions",
-                        switch("instructions"),
+                        self.switch("instructions"),
                     ),
-                    Button(screen, 450, 525, 300, 100, font,
-                           "QUIT GAME",
-                           self.quit),
+                    Button(
+                        screen,
+                        450, 525, 300, 100, font, "QUIT GAME", self.quit),
                 ],
                 images=[(self.logo, (420, 5))],
             ),
@@ -193,9 +214,9 @@ class Game:
                 self.pac_images,
                 self.config,
                 [
-                    Button(screen, 640, 15, 100, 30, font,
-                           "Pause",
-                           switch("pause")),
+                    Button(
+                        screen,
+                        640, 15, 100, 30, font, "Pause", self.switch("pause")),
                 ],
                 game_state=self.game_state,
             ),
@@ -205,11 +226,13 @@ class Game:
                 self.pause_bg2,
                 [
                     Button(
-                        screen, 700, 360, 150, 50, font, "Resume",
-                        switch("playing")
+                        screen,
+                        700, 360, 150, 50, font,
+                        "Resume", self.switch("playing")
                     ),
-                    Button(screen, 540, 460, 200, 50, font, "Quit Game",
-                           self.quit),
+                    Button(
+                        screen,
+                        540, 460, 200, 50, font, "Quit Game", self.quit),
                     Button(
                         screen,
                         390,
@@ -218,7 +241,7 @@ class Game:
                         50,
                         font,
                         "main_menu",
-                        switch("main_menu"),
+                        self.switch("main_menu"),
                     ),
                 ],
                 images=[(self.pause_bg, (400, 190))],
@@ -236,7 +259,7 @@ class Game:
                         50,
                         font,
                         "main_menu",
-                        switch("main_menu"),
+                        self.switch("main_menu"),
                     )
                 ],
             ),
@@ -253,7 +276,7 @@ class Game:
                         50,
                         font,
                         "main_menu",
-                        switch("main_menu"),
+                        self.switch("main_menu"),
                     ),
                     Button(
                         screen,
@@ -263,7 +286,7 @@ class Game:
                         50,
                         font,
                         "Cheat_Sheet",
-                        switch("cheat_screen"),
+                        self.switch("cheat_screen"),
                         self.CHCOLORS,
                     ),
                 ],
@@ -274,9 +297,8 @@ class Game:
                 "black",
                 [
                     Button(
-                        screen, 340, 380, 230, 50, font,
-                        "Play Again",
-                        self.new_game
+                        screen,
+                        340, 380, 230, 50, font, "Play Again", self.new_game
                     ),
                     Button(
                         screen,
@@ -286,7 +308,7 @@ class Game:
                         50,
                         font,
                         "main_menu",
-                        switch("main_menu"),
+                        self.switch("main_menu"),
                     ),
                 ],
                 title="Game Over",
@@ -305,7 +327,7 @@ class Game:
                         50,
                         font,
                         "main_menu",
-                        switch("main_menu"),
+                        self.switch("main_menu"),
                     ),
                 ],
             ),
@@ -321,7 +343,7 @@ class Game:
         """
         Switch the active screen, reloading highscore data when
         entering the highscore screen
-        
+
         Args:
             state: Name of the screen to show.
         """
@@ -347,7 +369,8 @@ class Game:
         Run the main loop until the game quits.
 
         Each frame: tick the clock, collect events, upfate the active screen,
-        apply the returned state change, draw and flip the display, Calls pygame.quit() on exit. 
+        apply the returned state change, draw and flip the display,
+        Calls pygame.quit() on exit.
         """
         while self.running:
             dt = self.clock.tick(FPS) / 1000
@@ -365,4 +388,3 @@ class Game:
             self.screens[self.state].draw()
             pygame.display.flip()
         pygame.quit()
-

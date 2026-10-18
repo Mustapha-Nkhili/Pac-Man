@@ -6,6 +6,7 @@ class Menu:
     Static screen made fo a background,
     optional images, an optional title and set of buttons
     """
+
     def __init__(
         self,
         screen,
@@ -19,7 +20,7 @@ class Menu:
     ) -> None:
         """
         Create a menu screen
-        
+
         Args:
             screen: surface to draw on.
             font: Font used to render the title.
@@ -27,7 +28,7 @@ class Menu:
             button: list of Button objects.
             images = images to draw over the background.
             title_pos: top_left position of the title.
-            title_color: color of the title text. 
+            title_color: color of the title text.
         """
         self.screen = screen
         self.background = background

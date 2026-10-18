@@ -78,6 +78,9 @@ class ConfigLoader:
             if not self._is_valid_int(height) or height <= 0:
                 return False
 
+            if height * width >= 1000:
+                return False
+
         return True
 
     def load_config(self, config_path: str) -> dict[str, Any]:

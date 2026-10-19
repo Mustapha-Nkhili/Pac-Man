@@ -78,6 +78,7 @@ class Gameplay:
         self.speed_bost = False
         self.invinsible = False
         self.frozen = False
+        self.get_time = 0
         self.ghost_img = {
             "red": pygame.image.load("img/ghost.png").convert_alpha(),
             "pink": pygame.image.load("img/pink_ghost.png").convert_alpha(),
@@ -245,6 +246,7 @@ class Gameplay:
         Returns:
             "name_entry": when the game is over, otherwise None.
         """
+        self.get_time += dt * 1000
         for event in events:
             for button in self.buttons:
                 if button.handle_event(event):
@@ -266,7 +268,8 @@ class Gameplay:
                 "Congratulation, Type your name to save your score"
             )
             return "name_entry"
-        now = pygame.time.get_ticks()
+        # now = pygame.time.get_ticks()
+        now = self.get_time
         if not self.invinsible:
             lives = self.player.lives
             self.game_state.check_collisions(
@@ -278,7 +281,8 @@ class Gameplay:
         self.animate()
         self.eat_pacgum()
         self.eat_super_pacgum()
-        now = pygame.time.get_ticks()
+        # now = pygame.time.get_ticks()
+        now = self.get_time
         if not self.frozen and now - self.ghost_last_move >= GHOST_DELAY:
             for ghost in self.ghosts_list:
                 ghost.take_turn(self.player.x, self.player.y)
@@ -322,7 +326,7 @@ class Gameplay:
             self.player,
             self.super_pacgums,
             self.ghosts_list,
-            pygame.time.get_ticks(),
+            self.get_time,
             self.config["points_per_super_pacgum"],
         )
 
@@ -402,7 +406,6 @@ class Gameplay:
                 elif event.key == pygame.K_n:
                     self.level_index += 1
                     if self.level_index >= len(self.config["level"]):
-
                         return True
                     self.reset()
                 elif event.key == pygame.K_i:
@@ -444,15 +447,18 @@ class Gameplay:
         """Draw the rotated pacman sprite,
         interpolated between the previous and current cell
         base on time since the last move."""
-        now = pygame.time.get_ticks()
+        # now = pygame.time.get_ticks()
+        now = self.get_time
         player_delay = FAST_PLAYER_DELAY if self.speed_bost else PLAYER_DELAY
         t = min((now - self.last_move) / player_delay, 1.0)
         old_center = self.center_cell(self.player.old_x, self.player.old_y)
         new_center = self.center_cell(self.player.x, self.player.y)
         lerp_x = old_center[0] + (new_center[0] - old_center[0]) * t
         lerp_y = old_center[1] + (new_center[1] - old_center[1]) * t
+        scaled_img = pygame.transform.scale(self.current_image,
+                (self.cell_size / 2, self.cell_size / 2))
         img = pygame.transform.rotate(
-            self.current_image, self.DIRE[self.player.direction]
+            scaled_img, self.DIRE[self.player.direction]
         )
         self.screen.blit(img, img.get_rect(center=(lerp_x, lerp_y)))
 
@@ -523,7 +529,7 @@ class Name_entry:
     highscore file when Enter is pressed.
     """
 
-    def __init__(self, screen, font, score, config) -> None:
+    def __init__(self, screen, font, score, config, buttons) -> None:
         """
         Create the name entry screen.
 
@@ -538,6 +544,7 @@ class Name_entry:
         self.player_name = ""
         self.score = score
         self.config = config
+        self.button = buttons
 
     def update(self, events, dt):
         """
@@ -556,6 +563,9 @@ class Name_entry:
         """
         try:
             for event in events:
+                for button in self.button:
+                    if button.handle_event(event):
+                        return "main_menu"
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_BACKSPACE:
                         self.player_name = self.player_name[:-1]
@@ -640,6 +650,8 @@ class Name_entry:
         self.screen.blit(text_sur, rect)
         self.screen.blit(score_sur, score_rect)
         self.screen.blit(Game_over, game_rect)
+        for button in self.button:
+            button.draw()
 
 
 class HighScoreScreen:
@@ -654,11 +666,11 @@ class HighScoreScreen:
             config: parse game configuration.
             buttons: Buttons shown on the screen.
         """
-        self.screen = screen
+        self.screen: pygame.Surface = screen
         self.font = font
         self.config = config
         self.button = buttons
-        self.scores_data = []
+        self.scores_data: list[dict] = []
 
     def load_data(self):
         """

@@ -3,8 +3,8 @@ from functools import partial
 import pygame
 
 from src.logic.game_state import GameState
-from UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
-from UI.menu import Menu
+from src.UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
+from src.UI.menu import Menu
 
 WIDTH, HEIGHT = 1280, 720
 FONT_PATH = "img/Pixel Game.otf"
@@ -336,6 +336,18 @@ class Game:
                 font,
                 0,
                 self.config,
+                [
+                    Button(
+                        screen,
+                        550,
+                        650,
+                        200,
+                        50,
+                        font,
+                        "main_menu",
+                        self.switch("main_menu"),
+                    ),
+                ],
             ),
         }
 

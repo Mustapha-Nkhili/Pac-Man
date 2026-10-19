@@ -8,7 +8,7 @@ import pygame
 from src.logic.entities import Player
 from src.logic.ghost import Ghost, GhostCorners, GhostStates
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
-
+from src.logic.game_state import GameState
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 150
@@ -51,10 +51,10 @@ class Gameplay:
         self,
         screen: pygame.Surface,
         font: pygame.font.Font,
-        pac_images: dict[str, pygame.Surface],
+        pac_images: list[pygame.Surface],
         config: dict,
         buttons: list,
-        game_state,
+        game_state: GameState,
     ) -> None:
         """Create tge gameplay screen and load the first level.
 
@@ -68,18 +68,18 @@ class Gameplay:
         game_state: shared game logic object for pacgums placement
         and collision handling.
         """
-        self.screen = screen
-        self.font = font
-        self.pac_images = pac_images
-        self.config = config
-        self.buttons = buttons
-        self.level_index = 0
-        self.game_state = game_state
-        self.speed_bost = False
-        self.invinsible = False
-        self.frozen = False
-        self.get_time = 0
-        self.ghost_img = {
+        self.screen: pygame.Surface = screen
+        self.font: pygame.font.Font = font
+        self.pac_images: list[pygame.Surface] = pac_images
+        self.config: dict = config
+        self.buttons: list = buttons
+        self.level_index: int = 0
+        self.game_state: GameState = game_state
+        self.speed_bost: bool = False
+        self.invinsible: bool = False
+        self.frozen: bool = False
+        self.get_time: float = 0.0
+        self.ghost_img: dict = {
             "red": pygame.image.load("img/ghost.png").convert_alpha(),
             "pink": pygame.image.load("img/pink_ghost.png").convert_alpha(),
             "yellow": pygame.image.load(
@@ -88,7 +88,7 @@ class Gameplay:
         }
         self.reset()
 
-    def reset(self):
+    def reset(self) -> str | None:
         """
         Load the current level and reset all pre-level state
 
@@ -109,7 +109,7 @@ class Gameplay:
         level = self.config["level"][self.level_index]
         maze = load_maze(level["width"], level["height"], self.config["seed"])
         self.maze_grid = maze["maze"]
-        self.qued_move = None
+        self.qued_move: int | None = None
         midx = len(self.maze_grid[0]) // 2
         midy = len(self.maze_grid) // 2
         safe_x, safe_y = self.find_open_cell(midx, midy)
@@ -125,7 +125,7 @@ class Gameplay:
         else:
             self.player.respawn()
             self.player.x, self.player.y = safe_x, safe_y
-            self.player.old_x, self.player.old_yF = safe_x, safe_y
+            self.player.old_x, self.player.old_y = safe_x, safe_y
             self.player.maze_grid = self.maze_grid
         self.ghost = Ghost(
             direction=RIGHT,
@@ -152,13 +152,13 @@ class Gameplay:
             color="yellow",
         )
         self.ghosts_list = [self.ghost, self.ghost2, self.ghost3, self.ghost4]
-        self.ghost_last_move = 0.0
+        self.ghost_last_move: float = 0.0
         self.time_left = self.config["level_max_time"]
         self.cell_size = min(width // level["width"], (
             hieght - 400) // level["height"])
         self.offset_x = (width - len(self.maze_grid[0]) * self.cell_size) // 2
         self.offset_y = (hieght - len(self.maze_grid) * self.cell_size) // 2
-        self.last_move = 0
+        self.last_move: float = 0.0
         self.frame_counter = 0
         self.pac_animation = cycle(self.pac_images)
         self.current_image = next(self.pac_animation)
@@ -174,8 +174,9 @@ class Gameplay:
         self.super_pacgums = self.game_state.place_super_pacgums(
             maze["width"], maze["height"]
         )
+        return None
 
-    def find_open_cell(self, midx, midy):
+    def find_open_cell(self, midx: int, midy: int) -> tuple[int, int]:
         """
         Find the valid center spawn cell.
 
@@ -202,12 +203,15 @@ class Gameplay:
                         queue.append((nx, ny))
         return (midx, midy)
 
-    def update_ghost_state(self, now) -> None:
+    def update_ghost_state(self, now: float) -> None:
+        """
+        Respawn ghost after a set amount of time.
+        """
         for ghost in self.ghosts_list:
             if ghost.state == GhostStates.EATEN:
                 if ghost.respawn_until == 0:
                     ghost.x, ghost.y = ghost._get_corner()
-                    ghost.respawn_until = now + ghost.respawn_duration
+                    ghost.respawn_until = int(now) + ghost.respawn_duration
                 elif now >= ghost.respawn_until:
                     ghost.respawn()
             elif (ghost.state == GhostStates.SCARED and
@@ -230,7 +234,7 @@ class Gameplay:
         self.player.x, self.player.y = safe_x, safe_y
         self.player.old_x, self.player.old_y = safe_x, safe_y
 
-    def update(self, events, dt):
+    def update(self, events: list[pygame.event.Event], dt: float)-> str | None:
         """
         Advance the game by one frame.
 
@@ -297,19 +301,19 @@ class Gameplay:
                 break
         return None
 
-    def draw_pacgums(self):
+    def draw_pacgums(self)-> None:
         """Draw every remaining regular pacgum as a small white dot."""
         for x, y in self.pacgums:
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 2)
 
-    def draw_super_pacgums(self):
+    def draw_super_pacgums(self) -> None:
         """Draw every renaining superpagums as a large white dot."""
         for x, y in self.super_pacgums:
             center = self.center_cell(x, y)
             pygame.draw.circle(self.screen, "white", center, 6)
 
-    def eat_pacgum(self):
+    def eat_pacgum(self) -> None:
         """Advance to the next level if no pacgums remain, then process pacgums
         collection and scoring for the player's current cell."""
         if len(self.pacgums) <= 0:
@@ -319,18 +323,18 @@ class Gameplay:
             self.player, self.pacgums, self.config["points_per_pacgum"]
         )
 
-    def eat_super_pacgum(self):
+    def eat_super_pacgum(self) -> None:
         """Process superpacgums collection, awrding points and scaring the
         ghosts that have not been eaten."""
         self.game_state.check_superpacgums_collisions(
             self.player,
             self.super_pacgums,
             self.ghosts_list,
-            self.get_time,
+            int(self.get_time),
             self.config["points_per_super_pacgum"],
         )
 
-    def animate(self):
+    def animate(self) -> None:
         """Advance the pacman sprite to it's next animation frame every
         FRAME_PER_IMAGE calls."""
         self.frame_counter += 1
@@ -338,7 +342,7 @@ class Gameplay:
             self.current_image = next(self.pac_animation)
             self.frame_counter = 0
 
-    def move_player(self):
+    def move_player(self) -> bool | None:
         """Move the player one cell, preferring the queued direction.
 
         if the queued direction is blocked, keeps moving in the current
@@ -359,7 +363,7 @@ class Gameplay:
             self.player.direction = self.qued_move
         return (self.player.x, self.player.y) != before
 
-    def origin_cell(self, x, y):
+    def origin_cell(self, x: int, y:int) -> tuple[int, int]:
         """Return the top lef screen pixel of a maze cell
         Args:
             x: cell column.
@@ -370,7 +374,7 @@ class Gameplay:
         return (self.offset_x + x * self.cell_size,
                 self.offset_y + y * self.cell_size)
 
-    def center_cell(self, x, y):
+    def center_cell(self, x: int, y: int) -> tuple[int, int]:
         """Rturn the center screen pixel of a maze cell.
         Args:
             x: cell colums.
@@ -381,7 +385,7 @@ class Gameplay:
         left, top = self.origin_cell(x, y)
         return left + self.cell_size // 2, top + self.cell_size // 2
 
-    def draw(self):
+    def draw(self) -> None:
         """Draw the whole gameolay screen: backgrounds,
         maze, pacgums, ghosts, player, HUD and buttons."""
         self.screen.fill(BACKGROUND)
@@ -394,7 +398,7 @@ class Gameplay:
         for button in self.buttons:
             button.draw()
 
-    def cheat_mode(self, events=None):
+    def cheat_mode(self, events: list[pygame.event.Event] | None=None) -> bool:
         """Apply the cheat bound to a pressed key"""
         if events:
             for event in events:
@@ -416,7 +420,7 @@ class Gameplay:
                     self.speed_bost = not self.speed_bost
         return False
 
-    def draw_maze(self):
+    def draw_maze(self) -> None:
         """
         Draw the maze walls.
         Each cell value is a bitmask: 1 = top wall, 2 = right wall,
@@ -443,7 +447,7 @@ class Gameplay:
                         self.screen, "white", (left, top), (left, bottom), 1
                     )
 
-    def draw_player(self):
+    def draw_player(self) -> None:
         """Draw the rotated pacman sprite,
         interpolated between the previous and current cell
         base on time since the last move."""
@@ -462,7 +466,7 @@ class Gameplay:
         )
         self.screen.blit(img, img.get_rect(center=(lerp_x, lerp_y)))
 
-    def draw_ghost(self):
+    def draw_ghost(self) -> None:
         """Draw every ghost centered on it's current cell."""
         for ghost in self.ghosts_list:
             if ghost.state == GhostStates.EATEN:
@@ -474,7 +478,7 @@ class Gameplay:
             center = self.center_cell(ghost.x, ghost.y)
             self.screen.blit(ghost_img, ghost_img.get_rect(center=center))
 
-    def draw_hud(self):
+    def draw_hud(self) -> None:
         """Draw lives, score, remaining time and current level,
         active cheats and ghosts states on the left."""
         lines = [
@@ -489,7 +493,7 @@ class Gameplay:
             surface = self.font.render(text, True, (255, 255, 255))
             self.screen.blit(surface, (20, 30 + i * 120))
 
-    def active_cheats(self):
+    def active_cheats(self) -> list[str]:
         """Keep track of the active cheats.
 
         Returns:
@@ -504,13 +508,13 @@ class Gameplay:
             active.append("FRZ")
         return active
 
-    def active_states(self):
+    def active_states(self) -> list[str]:
         """Keep track of the active ghosts states.
 
         Returns:
             A list of the active ghosts states.
         """
-        active = []
+        active: list[str] = []
         for ghost in self.ghosts_list:
             if ghost.state == GhostStates.SCARED:
                 if ("Scared") not in active:
@@ -529,7 +533,7 @@ class Name_entry:
     highscore file when Enter is pressed.
     """
 
-    def __init__(self, screen, font, score, config, buttons) -> None:
+    def __init__(self, screen: pygame.Surface, font: pygame.font.Font, score: int, config: dict, buttons: list) -> None:
         """
         Create the name entry screen.
 
@@ -539,14 +543,14 @@ class Name_entry:
             score: Final score to display and save.
             config: Prased game configuration.
         """
-        self.screen = screen
-        self.font = font
-        self.player_name = ""
-        self.score = score
-        self.config = config
-        self.button = buttons
+        self.screen: pygame.Surface = screen
+        self.font: pygame.font.Font = font
+        self.player_name: str = ""
+        self.score: int = score
+        self.config: dict = config
+        self.button: list = buttons
 
-    def update(self, events, dt):
+    def update(self, events: list[pygame.event.Event], dt: float)-> str | None:
         """
         Handle typing and saving.
 
@@ -591,7 +595,7 @@ class Name_entry:
                                 > 100
                             ):
                                 print("FILE TOO BIG")
-                                return
+                                return None
                             with open(
                                 self.config.get(
                                     "highscore_filename", "highscores.json"
@@ -601,7 +605,7 @@ class Name_entry:
                                 highscores = json.load(f)
                         if not isinstance(highscores, list):
                             print("invalid data format")
-                            return
+                            return None
                         valid_data = HighScoreScreen.dig(highscores)
                         highscores = valid_data
                         highscores.append(name_entry)
@@ -627,7 +631,7 @@ class Name_entry:
             print({e})
         return None
 
-    def draw(self):
+    def draw(self) -> None:
         """Draw the prompt, the achieved score and name input box."""
         self.screen.fill((28, 28, 28))
         display_text = self.config.get(
@@ -657,7 +661,7 @@ class Name_entry:
 class HighScoreScreen:
     """Screen displaying the top 10 saved scores."""
 
-    def __init__(self, screen, font, config, buttons) -> None:
+    def __init__(self, screen: pygame.Surface, font: pygame.font.Font, config: dict, buttons: list) -> None:
         """Create the highscore screen.
 
         Args:
@@ -672,7 +676,7 @@ class HighScoreScreen:
         self.button = buttons
         self.scores_data: list[dict] = []
 
-    def load_data(self):
+    def load_data(self) -> None:
         """
         Load and valudate scores from the highscore file.
 
@@ -711,7 +715,7 @@ class HighScoreScreen:
             print({e})
 
     @staticmethod
-    def dig(validating_data):
+    def dig(validating_data: list) -> list:
         """Recursively collect valid score entries from parse JSON.
 
         Accepts a dict or an arbitrily nested list.
@@ -740,7 +744,7 @@ class HighScoreScreen:
                 valid_data.extend(dig_data)
         return valid_data
 
-    def update(self, events, dt):
+    def update(self, events: list[pygame.event.Event], dt: float) -> str | None:
         """
         Forward events to the buttons.
 
@@ -754,9 +758,9 @@ class HighScoreScreen:
             for button in self.button:
                 if button.handle_event(event):
                     return "main_menu"
-        return
+        return None
 
-    def draw(self):
+    def draw(self) -> None:
         """Draw the title, the buttons and the ranked list of scores."""
         self.screen.fill("black")
         for button in self.button:

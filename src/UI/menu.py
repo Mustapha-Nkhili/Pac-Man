@@ -1,5 +1,5 @@
 import pygame
-
+from collections.abc import Sequence
 
 class Menu:
     """
@@ -9,14 +9,14 @@ class Menu:
 
     def __init__(
         self,
-        screen,
-        font,
-        background,
-        button,
-        images=(),
-        title=None,
-        title_pos=(0, 0),
-        title_color="white",
+        screen: pygame.Surface,
+        font: pygame.font.Font,
+        background: pygame.Surface | str,
+        button: list,
+        images: Sequence[tuple[pygame.Surface, tuple[int, int]]]=(),
+        title: str| None=None,
+        title_pos: tuple[int, int]=(0, 0),
+        title_color: str="white",
     ) -> None:
         """
         Create a menu screen
@@ -37,7 +37,7 @@ class Menu:
         self.title = font.render(title, True, title_color) if title else None
         self.title_pos = title_pos
 
-    def update(self, events, dt):
+    def update(self, events: list[pygame.event.Event], dt: float) -> None:
         """
         Forward events to the buttons, stopping at the first ine that handles
         and event.
@@ -54,7 +54,7 @@ class Menu:
                     return
         return
 
-    def draw(self):
+    def draw(self) -> None:
         """Draw the background, images, tile, and buttons"""
         if isinstance(self.background, pygame.Surface):
             self.screen.blit(self.background, (0, 0))

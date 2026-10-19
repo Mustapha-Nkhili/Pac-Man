@@ -1,7 +1,7 @@
 from functools import partial
 
 import pygame
-
+from typing import Callable, Any
 from src.logic.game_state import GameState
 from src.UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
 from src.UI.menu import Menu
@@ -21,7 +21,7 @@ class Button:
         }
 
     def __init__(
-        self, screen, x, y, width, height, font, text, on_click, color=COLORS
+        self, screen: pygame.Surface, x: int, y: int, width: int, height: int, font: pygame.font.Font, text: str, on_click: Callable, color: dict=COLORS
     ) -> None:
         """
         Create a button.
@@ -43,7 +43,7 @@ class Button:
         self.label = font.render(text, True, "white")
         self.color = color
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> bool:
         """
         Run the click callback in a left mouse press inside the button.
 
@@ -62,7 +62,7 @@ class Button:
             return True
         return False
 
-    def draw(self):
+    def draw(self) -> None:
         """
         Draw the button using the color for it's current state and it's label.
         """
@@ -90,7 +90,7 @@ class Game:
         "hover": "#631616",
         "pressed": "#2B1B1B"}
 
-    def __init__(self, game_state: GameState, config) -> None:
+    def __init__(self, game_state: GameState, config: dict) -> None:
         """
         Initialize pyage, create the window and font, laod assets and screens.
 
@@ -107,11 +107,12 @@ class Game:
         self.running = True
         self.state = "main_menu"
         self.game_state = game_state
+        self.screens: dict[str, Any] = {}
         self.load_assets()
         self.load_screens()
 
     @staticmethod
-    def images(path, size=None):
+    def images(path: str, size: tuple[int, int] | None=None) -> pygame.Surface:
         """
         Load an image with transparency, optionaly scaled.
 
@@ -125,7 +126,7 @@ class Game:
         image = pygame.image.load(path).convert_alpha()
         return pygame.transform.scale(image, size) if size else image
 
-    def load_assets(self):
+    def load_assets(self) -> None:
         """
         Load background, logo, pacman animation frames, and the ghost images"""
         window = (WIDTH, HEIGHT)
@@ -151,7 +152,7 @@ class Game:
         ]
         # self.ghost = self.images("img/my_ghost.png", (14, 14))
 
-    def switch(self, state):
+    def switch(self, state: str) -> Callable:
         """Create a callable that set the application state to `state`
 
         Args:
@@ -162,7 +163,7 @@ class Game:
         """
         return partial(self.set_state, state)
 
-    def load_screens(self):
+    def load_screens(self) -> None:
         """Build every screen and store then by name in self.screens."""
         screen, font = self.screen, self.font
         # switch = lambda state: partial(self.set_state, state)
@@ -351,7 +352,7 @@ class Game:
             ),
         }
 
-    def set_state(self, state):
+    def set_state(self, state: str) -> None:
         """
         Switch the active screen, reloading highscore data when
         entering the highscore screen
@@ -363,7 +364,7 @@ class Game:
         if state == "highscores":
             self.screens["highscores"].load_data()
 
-    def new_game(self):
+    def new_game(self) -> None:
         """
         Reset the gameplay screen and switch to it.
         """
@@ -372,11 +373,11 @@ class Game:
         self.screens["playing"].reset()
         self.state = "playing"
 
-    def quit(self):
+    def quit(self) -> None:
         """Stop the main loop."""
         self.running = False
 
-    def run(self):
+    def run(self) -> None:
         """
         Run the main loop until the game quits.
 

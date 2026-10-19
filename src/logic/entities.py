@@ -2,11 +2,6 @@ from .maze import DOWN, LEFT, RIGHT, UP, can_move
 
 
 class Entity:
-<<<<<<< HEAD
-    def __init__(
-        self, x: int, y: int, direction: int, maze_grid: list[list[int]]
-    ) -> None:
-=======
     """Represents a basic unit moving within a maze grid.
 
   Attributes:
@@ -27,7 +22,6 @@ class Entity:
         Initializes an Entity with spatial coordinates
         and structural constraints.
         """
->>>>>>> origin/main
         self.x = x
         self.y = y
         self.direction = direction
@@ -55,11 +49,6 @@ class Entity:
 
 
 class Player(Entity):
-<<<<<<< HEAD
-    def __init__(
-        self, x: int, y: int, lives: int, direction: int, maze_grid: list[list[int]]
-    ) -> None:
-=======
     """Represents the user-controlled entity in the maze.
 
     Attributes:
@@ -79,7 +68,6 @@ class Player(Entity):
         maze_grid: list[list[int]],
     ) -> None:
         """Initializes a Player instance with game state parameters."""
->>>>>>> origin/main
         super().__init__(x, y, direction, maze_grid)
         self.score = 0
         self.lives = lives
@@ -91,4 +79,3 @@ class Player(Entity):
     def respawn(self) -> None:
         """Resets player position back to their baseline spawn point."""
         self.x, self.y = self.spawn_x, self.spawn_y
-        self.old_x, self.old_y = self.spawn_x, self.spawn_y

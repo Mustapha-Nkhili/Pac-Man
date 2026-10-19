@@ -5,9 +5,6 @@ from mazegenerator import MazeGenerator
 UP, RIGHT, DOWN, LEFT = 1, 2, 4, 8
 
 
-<<<<<<< HEAD
-def load_maze(width: int = 15, height: int = 15, seed: int = 0, perfect: bool = False):
-=======
 def load_maze(
     width: int = 15, height: int = 15, seed: int = 0, perfect: bool = False
 ) -> dict[str, Any]:
@@ -22,15 +19,11 @@ def load_maze(
     Returns:
         A dictionary containing the maze matrix data, width, and height.
     """
->>>>>>> origin/main
     generator = MazeGenerator(size=(width, height), seed=seed, perfect=perfect)
 
     return {"maze": generator.maze, "width": width, "height": height}
 
 
-<<<<<<< HEAD
-def can_move(maze_grid, y, x, direction):
-=======
 def can_move(
     maze_grid: list[list[int]], y: int, x: int, direction: int
 ) -> bool:
@@ -48,5 +41,4 @@ def can_move(
     Returns:
         True if the entity can move into that space, False if blocked.
     """
->>>>>>> origin/main
     return not maze_grid[y][x] & direction

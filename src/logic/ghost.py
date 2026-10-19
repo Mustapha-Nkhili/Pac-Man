@@ -28,12 +28,6 @@ SHY_DISTANCE = 8
 
 
 class Ghost(Entity):
-<<<<<<< HEAD
-    def __init__(self, direction: int,
-                 maze_grid: list[list[int]],
-                 corner: GhostCorners,
-                 color) -> None:
-=======
     """Represents a ghost enemy that moves through the maze grid.
 
     A ghost can chase the player, run away from the player, or respawn
@@ -50,10 +44,13 @@ class Ghost(Entity):
     """
 
     def __init__(
-        self, direction: int, maze_grid: list[list[int]], corner: GhostCorners
+        self,
+        direction: int,
+        maze_grid: list[list[int]],
+        corner: GhostCorners,
+        color: str,
     ) -> None:
         """Initializes a Ghost object"""
->>>>>>> origin/main
         self.maze_height = len(maze_grid)
         self.maze_width = len(maze_grid[0])
         self.corner = corner
@@ -62,15 +59,11 @@ class Ghost(Entity):
         self.state = GhostStates.CHASE
         self.scared_until = 0
         self.scared_duration = 7000
-<<<<<<< HEAD
-        self.recent_cells = deque(maxlen=6)
+        self.recent_cells: deque[tuple[int, int]] = deque(maxlen=6)
+        self._is_retreating = False
         self.color = color
         self.respawn_until = 0
         self.respawn_duration = 7000
-=======
-        self.recent_cells: deque[tuple[int, int]] = deque(maxlen=6)
-        self._is_retreating = False
->>>>>>> origin/main
 
     def move(self, direction: int) -> None:
         """Moves the ghost and saves its position to the recent steps list.
@@ -196,19 +189,17 @@ class Ghost(Entity):
                     neighbors.append((nx, ny, direction))
 
         return neighbors
-<<<<<<< HEAD
+
     def respawn(self) -> None:
         self.x, self.y = self._get_corner()
         self.state = GhostStates.CHASE
         self.respawn_until = 0
         self.recent_cells.clear()
-=======
 
     def _escape_player_direction(
         self, player_x: int, player_y: int
     ) -> int | None:
         """Chooses a direction that moves the ghost furthest from the player.
->>>>>>> origin/main
 
         Args:
             player_x: The player's horizontal position.
@@ -287,9 +278,6 @@ class Ghost(Entity):
         return self._find_shortest_path(corner_x, corner_y)
 
     def take_turn(self, player_x: int, player_y: int) -> None:
-<<<<<<< HEAD
-        direction = None
-=======
         """Decides the ghost's next movement choice based on
             its type and state.
 
@@ -297,7 +285,7 @@ class Ghost(Entity):
             player_x: The current horizontal position of the player target.
             player_y: The current vertical position of the player target.
         """
->>>>>>> origin/main
+        direction: int | None = None
         if self.state == GhostStates.CHASE:
             if self.corner == GhostCorners.TOPLEFT:
                 direction = self._find_shortest_path(player_x, player_y)
@@ -314,21 +302,7 @@ class Ghost(Entity):
         elif self.state == GhostStates.SCARED:
             direction = self._escape_player_direction(player_x, player_y)
         elif self.state == GhostStates.EATEN:
-            x, y = self._get_corner()
             direction = None
-        else:
-            direction = None
+
         if direction is not None:
             self.move(direction)
-
-<<<<<<< HEAD
-        if self.state == GhostStates.EATEN and (self.x, self.y) == self._get_corner():
-            # self.state = GhostStates.CHASE
-            direction = None
-=======
-        if (
-            self.state == GhostStates.EATEN
-            and (self.x, self.y) == self._get_corner()
-        ):
-            self.state = GhostStates.CHASE
->>>>>>> origin/main

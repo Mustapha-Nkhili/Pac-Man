@@ -13,14 +13,6 @@ def main():
             print(f"Usage: uv run {sys.argv[0]} config.json", file=sys.stderr)
             sys.exit(1)
 
-<<<<<<< HEAD
-    game_state = GameState()
-    config = load_config(sys.argv[1])
-    maze = load_maze(
-        config["level"][1]["width"], config["level"][1]["height"], config["seed"]
-    )
-    Game(game_state, config).run()
-=======
         game_state = GameState()
         config = ConfigLoader().load_config(sys.argv[1])
         Game(game_state, config).run()
@@ -28,7 +20,6 @@ def main():
     except ConfigError as e:
         print(e)
         sys.exit(1)
->>>>>>> origin/main
 
 
 if __name__ == "__main__":

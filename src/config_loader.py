@@ -1,36 +1,16 @@
 import json
 from typing import Any, TypeGuard
 
-<<<<<<< HEAD
-DEFAULTS = {
-=======
 DEFAULTS: dict[str, Any] = {
->>>>>>> origin/main
     "highscore_filename": "highscores.json",
     "seed": 42,
     "level_max_time": 90,
     "lives": 3,
-<<<<<<< HEAD
-    "pacgum": 42,
-=======
     "pacgum": 10,
->>>>>>> origin/main
     "points_per_pacgum": 10,
     "points_per_super_pacgum": 50,
     "points_per_ghost": 200,
     "level": [
-<<<<<<< HEAD
-        {"width": 15, "height": 15},
-        {"width": 20, "height": 20},
-        {"width": 30, "height": 30},
-        {"width": 40, "height": 40},
-        {"width": 55, "height": 55},
-        {"width": 50, "height": 50},
-        {"width": 45, "height": 45},
-        {"width": 40, "height": 40},
-        {"width": 55, "height": 55},
-        {"width": 50, "height": 50},
-=======
         {"width": 11, "height": 7},
         {"width": 13, "height": 9},
         {"width": 15, "height": 9},
@@ -41,7 +21,6 @@ DEFAULTS: dict[str, Any] = {
         {"width": 23, "height": 13},
         {"width": 25, "height": 13},
         {"width": 25, "height": 15},
->>>>>>> origin/main
     ],
 }
 
@@ -115,11 +94,6 @@ class ConfigLoader:
         Args:
             config_path: a path to the JSON config file.
 
-<<<<<<< HEAD
-    if not isinstance(data, dict):
-        print("Config Error: the config file must be a JSON object, " "using defaults")
-        return DEFAULTS.copy()
-=======
         Returns:
             A dict containing every key in DEFAULTS, each holding
             either its validated value from the file or its default.
@@ -133,7 +107,6 @@ class ConfigLoader:
         except json.JSONDecodeError as e:
             print(f"Config Error: {e}, using defaults")
             return DEFAULTS.copy()
->>>>>>> origin/main
 
         if not isinstance(data, dict):
             print(
@@ -146,49 +119,6 @@ class ConfigLoader:
         for key, default in DEFAULTS.items():
             value = data.get(key)
 
-<<<<<<< HEAD
-        if key in {"level_max_time", "lives", "pacgum"}:
-            if is_valid_int(value) and value > 0:
-                config[key] = value
-            else:
-                print(f"Config Error: {key} must be a number > 0, " "using default")
-                config[key] = default
-
-        elif key in {
-            "points_per_pacgum",
-            "points_per_super_pacgum",
-            "points_per_ghost",
-        }:
-            if is_valid_int(value) and value >= 0:
-                config[key] = value
-            else:
-                print(f"Config Error: {key} must be a number >= 0, " "using default")
-                config[key] = default
-        elif key == "seed":
-            if is_valid_int(value):
-                config[key] = value
-            else:
-                print(f"Config Error: {key} must be a number, using default")
-                config[key] = default
-        elif key == "highscore_filename":
-            if isinstance(value, str) and value and value.endswith(".json"):
-                config[key] = value
-            else:
-                print(
-                    f"Config Error: {key} must be a non-empty "
-                    ".json file, using default"
-                )
-                config[key] = default
-        elif key == "level":
-            if is_valid_level_list(value):
-                config[key] = value
-            else:
-                print(
-                    "Config Error: must be a list of 10 items of "
-                    "{width, height} dict, using default"
-                )
-                config[key] = default
-=======
             if value is None:
                 print(f"{key} is missing, using default")
                 value = default
@@ -202,7 +132,6 @@ class ConfigLoader:
                         "using default"
                     )
                     config[key] = default
->>>>>>> origin/main
 
             elif key in {
                 "points_per_pacgum",

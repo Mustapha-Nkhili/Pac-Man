@@ -109,7 +109,13 @@ class Gameplay:
             )
             return "name_entry"
         level = self.config["level"][self.level_index]
-        maze = load_maze(level["width"], level["height"], self.config["seed"])
+        if self.level_index == 0:
+            maze = load_maze(
+                        level["width"],
+                        level["height"],
+                        self.config["seed"])
+        else:
+            maze = load_maze(level["width"], level["height"], -1)
         self.maze_grid = maze["maze"]
         self.qued_move: int | None = None
         midx = len(self.maze_grid[0]) // 2

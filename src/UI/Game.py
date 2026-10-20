@@ -376,6 +376,9 @@ class Game:
         """
         self.screens["playing"].player = None
         self.screens["playing"].level_index = 0
+        self.screens["playing"].speed_bost = False
+        self.screens["playing"].invinsible = False
+        self.screens["playing"].frozen = False
         self.screens["playing"].reset()
         self.state = "playing"
 

@@ -20,6 +20,9 @@ def main() -> None:
     except ConfigError as e:
         print(e)
         sys.exit(1)
+    except KeyboardInterrupt:
+        print("Error: Keyboard interrupt detected")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

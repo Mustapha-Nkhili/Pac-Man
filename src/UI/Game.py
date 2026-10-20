@@ -4,12 +4,13 @@ from typing import Any
 
 import pygame
 
+from src.resources import resource_path
 from src.logic.game_state import GameState
 from src.UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
 from src.UI.menu import Menu
 
 WIDTH, HEIGHT = 1280, 720
-FONT_PATH = "img/Pixel Game.otf"
+FONT_PATH = resource_path("img/Pixel Game.otf")
 FPS = 60
 
 
@@ -136,14 +137,14 @@ class Game:
         """
         Load background, logo, pacman animation frames, and the ghost images"""
         window = (WIDTH, HEIGHT)
-        self.logo = self.images("./img/pacmanlogo", (350, 150))
-        self.menu_bg = self.images("img/pause_back.jpg", window)
-        self.pause_bg = self.images("img/pause.png", (500, 150))
-        self.pause_bg2 = self.images("img/pause_back2.jpg", window)
-        self.instructions = self.images("img/Instructions.png", window)
-        self.cheat_bg = self.images("img/cheat_screen.png", window)
+        self.logo = self.images(resource_path("./img/pacmanlogo"), (350, 150))
+        self.menu_bg = self.images(resource_path("img/pause_back.jpg"), window)
+        self.pause_bg = self.images(resource_path("img/pause.png"), (500, 150))
+        self.pause_bg2 = self.images(resource_path("img/pause_back2.jpg"), window)
+        self.instructions = self.images(resource_path("img/Instructions.png"), window)
+        self.cheat_bg = self.images(resource_path("img/cheat_screen.png"), window)
         self.pac_images = [
-            self.images(f"img/{name}", (14, 14))
+            self.images(resource_path(f"img/{name}"), (14, 14))
             for name in (
                 "pacmanopen.png",
                 "pacmanclosed.png",
@@ -156,7 +157,7 @@ class Game:
                 "pacmant6.png",
             )
         ]
-        # self.ghost = self.images("img/my_ghost.png", (14, 14))
+        # self.ghost = self.images(resource_path("img/my_ghost.png"), (14, 14))
 
     def switch(self, state: str) -> Callable:
         """Create a callable that set the application state to `state`

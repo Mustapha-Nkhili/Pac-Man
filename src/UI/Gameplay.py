@@ -5,6 +5,7 @@ from json import JSONDecodeError
 
 import pygame
 
+from src.resources import resource_path
 from src.logic.entities import Player
 from src.logic.game_state import GameState
 from src.logic.ghost import Ghost, GhostCorners, GhostStates
@@ -81,11 +82,11 @@ class Gameplay:
         self.frozen: bool = False
         self.get_time: float = 0.0
         self.ghost_img: dict = {
-            "red": pygame.image.load("img/ghost.png").convert_alpha(),
-            "pink": pygame.image.load("img/pink_ghost.png").convert_alpha(),
+            "red": pygame.image.load(resource_path("img/ghost.png")).convert_alpha(),
+            "pink": pygame.image.load(resource_path("img/pink_ghost.png")).convert_alpha(),
             "yellow": pygame.image.load(
-                "img/yellow_ghost.png").convert_alpha(),
-            "green": pygame.image.load("img/green_ghost.png").convert_alpha(),
+                resource_path("img/yellow_ghost.png")).convert_alpha(),
+            "green": pygame.image.load(resource_path("img/green_ghost.png")).convert_alpha(),
         }
         self.reset()
 

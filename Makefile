@@ -30,13 +30,9 @@ lint: $(VENV)
 	uv run mypy . $(MYPY_FLAGS) --exclude '$(VENV)'
 
 
-lint-strict: $(VENV)
-	uv run flake8 . --extend-exclude=$(VENV)
-	uv run mypy . --strict --exclude '$(VENV)'
-
 package:
 	uv run pyinstaller --onefile --windowed --name pacman \
 		--add-data "img:img" --add-data "config.json:." \
 		--hidden-import mazegenerator --paths . pac-man.py
 
-.PHONY: run install debug lint lint-strict clean package
+.PHONY: run install debug lint clean package

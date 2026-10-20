@@ -105,7 +105,9 @@ class Game:
         "pressed": "#2B1B1B",
     }
 
-    def __init__(self, game_state: GameState, config: dict, maze: MazeLoader) -> None:
+    def __init__(
+        self, game_state: GameState, config: dict, maze: MazeLoader
+    ) -> None:
         """
         Initialize pyage, create the window and font, laod assets and screens.
 
@@ -258,7 +260,7 @@ class Game:
                     ),
                 ],
                 game_state=self.game_state,
-                maze=self.maze
+                maze=self.maze,
             ),
             "pause": Menu(
                 screen,

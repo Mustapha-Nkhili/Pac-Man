@@ -44,7 +44,11 @@ class Ghost(Entity):
     """
 
     def __init__(
-        self, direction: int, maze_grid: list[list[int]], corner: GhostCorners
+        self,
+        direction: int,
+        maze_grid: list[list[int]],
+        corner: GhostCorners,
+        color: str,
     ) -> None:
         """Initializes a Ghost object"""
         self.maze_height = len(maze_grid)
@@ -57,6 +61,9 @@ class Ghost(Entity):
         self.scared_duration = 7000
         self.recent_cells: deque[tuple[int, int]] = deque(maxlen=6)
         self._is_retreating = False
+        self.color = color
+        self.respawn_until = 0
+        self.respawn_duration = 7000
 
     def move(self, direction: int) -> None:
         """Moves the ghost and saves its position to the recent steps list.
@@ -183,6 +190,12 @@ class Ghost(Entity):
 
         return neighbors
 
+    def respawn(self) -> None:
+        self.x, self.y = self._get_corner()
+        self.state = GhostStates.CHASE
+        self.respawn_until = 0
+        self.recent_cells.clear()
+
     def _escape_player_direction(
         self, player_x: int, player_y: int
     ) -> int | None:
@@ -272,6 +285,7 @@ class Ghost(Entity):
             player_x: The current horizontal position of the player target.
             player_y: The current vertical position of the player target.
         """
+        direction: int | None = None
         if self.state == GhostStates.CHASE:
             if self.corner == GhostCorners.TOPLEFT:
                 direction = self._find_shortest_path(player_x, player_y)
@@ -288,15 +302,7 @@ class Ghost(Entity):
         elif self.state == GhostStates.SCARED:
             direction = self._escape_player_direction(player_x, player_y)
         elif self.state == GhostStates.EATEN:
-            x, y = self._get_corner()
-            direction = self._find_shortest_path(x, y)
-        else:
             direction = None
+
         if direction is not None:
             self.move(direction)
-
-        if (
-            self.state == GhostStates.EATEN
-            and (self.x, self.y) == self._get_corner()
-        ):
-            self.state = GhostStates.CHASE

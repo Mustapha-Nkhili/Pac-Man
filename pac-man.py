@@ -2,10 +2,10 @@ import sys
 
 from src.config_loader import ConfigLoader, ConfigError
 from src.logic.game_state import GameState
-from UI.Game import Game
+from src.UI.Game import Game
 
 
-def main():
+def main() -> None:
     """Reads the configuration file and starts the game."""
     try:
         if len(sys.argv) != 2:

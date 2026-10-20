@@ -19,7 +19,7 @@ def main() -> None:
         config = ConfigLoader().load_config(sys.argv[1])
         Game(game_state, config, maze).run()
 
-    except ConfigError as e:
+    except (ConfigError, RuntimeError) as e:
         print(e)
         sys.exit(1)
     except KeyboardInterrupt:

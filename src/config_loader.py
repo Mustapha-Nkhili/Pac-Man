@@ -78,9 +78,9 @@ class ConfigLoader:
             if not isinstance(item, dict):
                 return False
             width, height = item.get("width"), item.get("height")
-            if not self._is_valid_int(width) or width <= 0:
+            if not self._is_valid_int(width) or width < 5:
                 return False
-            if not self._is_valid_int(height) or height <= 0:
+            if not self._is_valid_int(height) or height < 5:
                 return False
 
             if height * width >= 1000:

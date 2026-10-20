@@ -22,11 +22,17 @@ class MazeLoader:
         Returns:
             A list containing the maze data.
         """
-        generator = MazeGenerator(
-            size=(width, height), seed=seed, perfect=perfect
-        )
+        try:
+            generator = MazeGenerator(
+                size=(width, height), seed=seed, perfect=perfect
+            )
+        except RecursionError:
+            raise RuntimeError(
+                f"Error: maze {width}x{height} is too large to generate"
+            )
 
-        return generator.maze
+        maze: list[list[int]] = generator.maze
+        return maze
 
     def can_move(
         self, maze_grid: list[list[int]], y: int, x: int, direction: int

@@ -20,7 +20,7 @@ class MazeLoader:
             perfect: If True, the maze has no loops or open rooms.
 
         Returns:
-            A dictionary containing the maze matrix data, width, and height.
+            A list containing the maze data.
         """
         generator = MazeGenerator(
             size=(width, height), seed=seed, perfect=perfect

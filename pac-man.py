@@ -5,7 +5,7 @@ from src.logic.game_state import GameState
 from src.UI.Game import Game
 
 
-def main():
+def main() -> None:
     """Reads the configuration file and starts the game."""
     try:
         if len(sys.argv) != 2:

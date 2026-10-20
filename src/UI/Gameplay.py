@@ -6,9 +6,10 @@ from json import JSONDecodeError
 import pygame
 
 from src.logic.entities import Player
+from src.logic.game_state import GameState
 from src.logic.ghost import Ghost, GhostCorners, GhostStates
 from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
-from src.logic.game_state import GameState
+
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
 PLAYER_DELAY = 150
@@ -234,7 +235,10 @@ class Gameplay:
         self.player.x, self.player.y = safe_x, safe_y
         self.player.old_x, self.player.old_y = safe_x, safe_y
 
-    def update(self, events: list[pygame.event.Event], dt: float)-> str | None:
+    def update(
+            self,
+            events: list[pygame.event.Event],
+            dt: float) -> str | None:
         """
         Advance the game by one frame.
 
@@ -301,7 +305,7 @@ class Gameplay:
                 break
         return None
 
-    def draw_pacgums(self)-> None:
+    def draw_pacgums(self) -> None:
         """Draw every remaining regular pacgum as a small white dot."""
         for x, y in self.pacgums:
             center = self.center_cell(x, y)
@@ -363,7 +367,7 @@ class Gameplay:
             self.player.direction = self.qued_move
         return (self.player.x, self.player.y) != before
 
-    def origin_cell(self, x: int, y:int) -> tuple[int, int]:
+    def origin_cell(self, x: int, y: int) -> tuple[int, int]:
         """Return the top lef screen pixel of a maze cell
         Args:
             x: cell column.
@@ -398,7 +402,9 @@ class Gameplay:
         for button in self.buttons:
             button.draw()
 
-    def cheat_mode(self, events: list[pygame.event.Event] | None=None) -> bool:
+    def cheat_mode(
+                self,
+                events: list[pygame.event.Event] | None = None) -> bool:
         """Apply the cheat bound to a pressed key"""
         if events:
             for event in events:
@@ -459,7 +465,8 @@ class Gameplay:
         new_center = self.center_cell(self.player.x, self.player.y)
         lerp_x = old_center[0] + (new_center[0] - old_center[0]) * t
         lerp_y = old_center[1] + (new_center[1] - old_center[1]) * t
-        scaled_img = pygame.transform.scale(self.current_image,
+        scaled_img = pygame.transform.scale(
+                self.current_image,
                 (self.cell_size / 2, self.cell_size / 2))
         img = pygame.transform.rotate(
             scaled_img, self.DIRE[self.player.direction]
@@ -533,7 +540,9 @@ class Name_entry:
     highscore file when Enter is pressed.
     """
 
-    def __init__(self, screen: pygame.Surface, font: pygame.font.Font, score: int, config: dict, buttons: list) -> None:
+    def __init__(
+                self, screen: pygame.Surface, font: pygame.font.Font,
+                score: int, config: dict, buttons: list) -> None:
         """
         Create the name entry screen.
 
@@ -550,7 +559,9 @@ class Name_entry:
         self.config: dict = config
         self.button: list = buttons
 
-    def update(self, events: list[pygame.event.Event], dt: float)-> str | None:
+    def update(
+                self, events: list[pygame.event.Event],
+                dt: float) -> str | None:
         """
         Handle typing and saving.
 
@@ -661,7 +672,10 @@ class Name_entry:
 class HighScoreScreen:
     """Screen displaying the top 10 saved scores."""
 
-    def __init__(self, screen: pygame.Surface, font: pygame.font.Font, config: dict, buttons: list) -> None:
+    def __init__(
+                self,
+                screen: pygame.Surface, font: pygame.font.Font,
+                config: dict, buttons: list) -> None:
         """Create the highscore screen.
 
         Args:
@@ -744,7 +758,10 @@ class HighScoreScreen:
                 valid_data.extend(dig_data)
         return valid_data
 
-    def update(self, events: list[pygame.event.Event], dt: float) -> str | None:
+    def update(
+                self,
+                events: list[pygame.event.Event],
+                dt: float) -> str | None:
         """
         Forward events to the buttons.
 

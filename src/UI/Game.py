@@ -1,7 +1,9 @@
+from collections.abc import Callable
 from functools import partial
+from typing import Any
 
 import pygame
-from typing import Callable, Any
+
 from src.logic.game_state import GameState
 from src.UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
 from src.UI.menu import Menu
@@ -21,7 +23,9 @@ class Button:
         }
 
     def __init__(
-        self, screen: pygame.Surface, x: int, y: int, width: int, height: int, font: pygame.font.Font, text: str, on_click: Callable, color: dict=COLORS
+        self, screen: pygame.Surface, x: int, y: int, width: int, height: int,
+        font: pygame.font.Font, text: str, on_click: Callable,
+        color: dict = COLORS
     ) -> None:
         """
         Create a button.
@@ -112,7 +116,9 @@ class Game:
         self.load_screens()
 
     @staticmethod
-    def images(path: str, size: tuple[int, int] | None=None) -> pygame.Surface:
+    def images(
+                path: str,
+                size: tuple[int, int] | None = None) -> pygame.Surface:
         """
         Load an image with transparency, optionaly scaled.
 

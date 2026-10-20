@@ -1,5 +1,7 @@
-import pygame
 from collections.abc import Sequence
+
+import pygame
+
 
 class Menu:
     """
@@ -13,10 +15,10 @@ class Menu:
         font: pygame.font.Font,
         background: pygame.Surface | str,
         button: list,
-        images: Sequence[tuple[pygame.Surface, tuple[int, int]]]=(),
-        title: str| None=None,
-        title_pos: tuple[int, int]=(0, 0),
-        title_color: str="white",
+        images: Sequence[tuple[pygame.Surface, tuple[int, int]]] = (),
+        title: str | None = None,
+        title_pos: tuple[int, int] = (0, 0),
+        title_color: str = "white",
     ) -> None:
         """
         Create a menu screen

@@ -3,7 +3,7 @@ from enum import Enum, auto
 import random
 
 from .entities import Entity
-from .maze import DOWN, LEFT, RIGHT, UP, can_move
+from .maze import DOWN, LEFT, RIGHT, UP, MazeLoader
 
 
 class GhostStates(Enum):
@@ -46,6 +46,7 @@ class Ghost(Entity):
     def __init__(
         self,
         direction: int,
+        maze: MazeLoader,
         maze_grid: list[list[int]],
         corner: GhostCorners,
         color: str,
@@ -55,7 +56,7 @@ class Ghost(Entity):
         self.maze_width = len(maze_grid[0])
         self.corner = corner
         x, y = self._get_corner()
-        super().__init__(x, y, direction, maze_grid)
+        super().__init__(x, y, direction, maze, maze_grid)
         self.state = GhostStates.CHASE
         self.scared_until = 0
         self.scared_duration = 7000
@@ -161,7 +162,7 @@ class Ghost(Entity):
             for neighbor in neighbors:
                 next_x, next_y, direction = neighbor
 
-                if can_move(self.maze_grid, y, x, direction):
+                if self.maze.can_move(self.maze_grid, y, x, direction):
                     came_from[(next_x, next_y)] = ((x, y), direction)
                     queue.append((next_x, next_y))
 
@@ -185,7 +186,7 @@ class Ghost(Entity):
 
         for nx, ny, direction in directions:
             if 0 <= nx < self.maze_width and 0 <= ny < self.maze_height:
-                if can_move(self.maze_grid, y, x, direction):
+                if self.maze.can_move(self.maze_grid, y, x, direction):
                     neighbors.append((nx, ny, direction))
 
         return neighbors

@@ -9,7 +9,7 @@ from src.resources import resource_path
 from src.logic.entities import Player
 from src.logic.game_state import GameState
 from src.logic.ghost import Ghost, GhostCorners, GhostStates
-from src.logic.maze import DOWN, LEFT, RIGHT, UP, load_maze
+from src.logic.maze import DOWN, LEFT, RIGHT, UP, MazeLoader
 
 CELL_SIZE = 20
 BACKGROUND = (28, 28, 31)
@@ -57,6 +57,7 @@ class Gameplay:
         config: dict,
         buttons: list,
         game_state: GameState,
+        maze: MazeLoader,
     ) -> None:
         """Create tge gameplay screen and load the first level.
 
@@ -95,6 +96,7 @@ class Gameplay:
                 resource_path("img/green_ghost.png")
             ).convert_alpha(),
         }
+        self.maze = maze
         self.reset()
 
     def reset(self) -> str | None:
@@ -117,12 +119,12 @@ class Gameplay:
             return "name_entry"
         level = self.config["level"][self.level_index]
         if self.level_index == 0:
-            maze = load_maze(
+            maze = self.maze.load_maze(
                 level["width"], level["height"], self.config["seed"]
             )
         else:
-            maze = load_maze(level["width"], level["height"], -1)
-        self.maze_grid = maze["maze"]
+            maze = self.maze.load_maze(level["width"], level["height"], -1)
+        self.maze_grid = maze
         self.qued_move: int | None = None
         midx = len(self.maze_grid[0]) // 2
         midy = len(self.maze_grid) // 2
@@ -134,6 +136,7 @@ class Gameplay:
                 y=safe_y,
                 lives=self.config["lives"],
                 direction=RIGHT,
+                maze=self.maze,
                 maze_grid=self.maze_grid,
             )
         else:
@@ -143,24 +146,28 @@ class Gameplay:
             self.player.maze_grid = self.maze_grid
         self.ghost = Ghost(
             direction=RIGHT,
+            maze=self.maze,
             maze_grid=self.maze_grid,
             corner=GhostCorners.BOTTOMRIGHT,
             color="red",
         )
         self.ghost3 = Ghost(
             direction=RIGHT,
+            maze=self.maze,
             maze_grid=self.maze_grid,
             corner=GhostCorners.TOPLEFT,
             color="pink",
         )
         self.ghost2 = Ghost(
             direction=RIGHT,
+            maze=self.maze,
             maze_grid=self.maze_grid,
             corner=GhostCorners.TOPRIGHT,
             color="green",
         )
         self.ghost4 = Ghost(
             direction=RIGHT,
+            maze=self.maze,
             maze_grid=self.maze_grid,
             corner=GhostCorners.BOTTOMLEFT,
             color="yellow",
@@ -177,24 +184,18 @@ class Gameplay:
         self.frame_counter = 0
         self.pac_animation = cycle(self.pac_images)
         self.current_image = next(self.pac_animation)
-        self.excluded = {
-            (0, 0),
-            (maze["width"] - 1, 0),
-            (0, maze["height"] - 1),
-            (maze["width"] - 1, maze["height"] - 1),
-        }
         midx = len(self.maze_grid[0]) // 2
         midy = len(self.maze_grid) // 2
         safe_x, safe_y = self.find_open_cell(midx, midy)
         self.pacgums = self.game_state.place_pacgums(
-            maze["width"],
-            maze["height"],
-            maze["maze"],
+            level["width"],
+            level["height"],
+            maze,
             self.config["pacgum"],
             (safe_x, safe_y),
         )
         self.super_pacgums = self.game_state.place_super_pacgums(
-            maze["width"], maze["height"]
+            level["width"], level["height"]
         )
         return None
 

@@ -5,6 +5,7 @@ from typing import Any
 import pygame
 
 from src.resources import resource_path
+from src.logic.maze import MazeLoader
 from src.logic.game_state import GameState
 from src.UI.Gameplay import Gameplay, HighScoreScreen, Name_entry
 from src.UI.menu import Menu
@@ -104,7 +105,7 @@ class Game:
         "pressed": "#2B1B1B",
     }
 
-    def __init__(self, game_state: GameState, config: dict) -> None:
+    def __init__(self, game_state: GameState, config: dict, maze: MazeLoader) -> None:
         """
         Initialize pyage, create the window and font, laod assets and screens.
 
@@ -121,6 +122,7 @@ class Game:
         self.running = True
         self.state = "main_menu"
         self.game_state = game_state
+        self.maze = maze
         self.screens: dict[str, Any] = {}
         self.load_assets()
         self.load_screens()
@@ -256,6 +258,7 @@ class Game:
                     ),
                 ],
                 game_state=self.game_state,
+                maze=self.maze
             ),
             "pause": Menu(
                 screen,

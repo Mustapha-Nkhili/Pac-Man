@@ -1,4 +1,4 @@
-from .maze import DOWN, LEFT, RIGHT, UP, can_move
+from .maze import DOWN, LEFT, RIGHT, UP, MazeLoader
 
 
 class Entity:
@@ -16,7 +16,12 @@ class Entity:
     """
 
     def __init__(
-        self, x: int, y: int, direction: int, maze_grid: list[list[int]]
+        self,
+        x: int,
+        y: int,
+        direction: int,
+        maze: MazeLoader,
+        maze_grid: list[list[int]],
     ) -> None:
         """
         Initializes an Entity with spatial coordinates
@@ -25,6 +30,7 @@ class Entity:
         self.x = x
         self.y = y
         self.direction = direction
+        self.maze = maze
         self.maze_grid = maze_grid
         self.maze_height = len(maze_grid)
         self.maze_width = len(maze_grid[0])
@@ -36,7 +42,7 @@ class Entity:
             direction: The desired integer heading to attempt navigating
                 towards.
         """
-        if can_move(self.maze_grid, self.y, self.x, direction):
+        if self.maze.can_move(self.maze_grid, self.y, self.x, direction):
             self.direction = direction
             if direction == UP:
                 self.y -= 1
@@ -66,10 +72,11 @@ class Player(Entity):
         y: int,
         lives: int,
         direction: int,
+        maze: MazeLoader,
         maze_grid: list[list[int]],
     ) -> None:
         """Initializes a Player instance with game state parameters."""
-        super().__init__(x, y, direction, maze_grid)
+        super().__init__(x, y, direction, maze, maze_grid)
         self.score = 0
         self.lives = lives
         self.old_x = x

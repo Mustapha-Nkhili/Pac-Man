@@ -23,6 +23,7 @@ clean:
 	rm -rf .mypy_cache
 	rm -rf src/__pycache__
 	rm -rf src/logic/__pycache__
+	rm -rf src/UI/__pycache__
 
 
 lint: $(VENV)

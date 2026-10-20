@@ -4,15 +4,15 @@ from .maze import DOWN, LEFT, RIGHT, UP, can_move
 class Entity:
     """Represents a basic unit moving within a maze grid.
 
-  Attributes:
-        x: The current horizontal grid coordinate.
-        y: The current vertical grid coordinate.
-        direction: The current heading integer representing UP, DOWN, LEFT,
-            or RIGHT.
-        maze_grid: A 2D array representation of the structural maze layout.
-        maze_height: Total row count extracted from the maze grid.
-        maze_width: Total column count extracted from the first row of the
-            maze grid.
+    Attributes:
+          x: The current horizontal grid coordinate.
+          y: The current vertical grid coordinate.
+          direction: The current heading integer representing UP, DOWN, LEFT,
+              or RIGHT.
+          maze_grid: A 2D array representation of the structural maze layout.
+          maze_height: Total row count extracted from the maze grid.
+          maze_width: Total column count extracted from the first row of the
+              maze grid.
     """
 
     def __init__(
@@ -59,6 +59,7 @@ class Player(Entity):
         spawn_x: The initial baseline horizontal coordinate used for resets.
         spawn_y: The initial baseline vertical coordinate used for resets.
     """
+
     def __init__(
         self,
         x: int,

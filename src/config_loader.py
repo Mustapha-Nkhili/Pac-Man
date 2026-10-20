@@ -100,7 +100,7 @@ class ConfigLoader:
             either its validated value from the file or its default.
         """
         try:
-            if  os.path.getsize(config_path) // (1024 * 1024) > 10:
+            if os.path.getsize(config_path) // (1024 * 1024) > 10:
                 raise ConfigError("Config Error: size of the config is big")
 
             with open(config_path) as file:

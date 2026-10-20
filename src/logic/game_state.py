@@ -32,7 +32,12 @@ class GameState:
         }
 
     def place_pacgums(
-        self, width: int, height: int, maze: list[list[int]], count: int
+        self,
+        width: int,
+        height: int,
+        maze: list[list[int]],
+        count: int,
+        center_cell: tuple[int, int],
     ) -> set[tuple[int, int]]:
         """Puts normal pacgums on random empty spaces of the map.
 
@@ -49,7 +54,6 @@ class GameState:
         """
         rng = random.Random()
 
-        center_cell = (width // 2, height // 2)
         excluded = self._get_corners(width, height) | {center_cell}
         cells_without_42 = [
             (x, y)

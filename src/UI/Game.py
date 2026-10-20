@@ -20,13 +20,20 @@ class Button:
     COLORS = {
         "normal": (51, 55, 150),
         "hover": "#18285C",
-        "pressed": "#919191"
-        }
+        "pressed": "#919191",
+    }
 
     def __init__(
-        self, screen: pygame.Surface, x: int, y: int, width: int, height: int,
-        font: pygame.font.Font, text: str, on_click: Callable,
-        color: dict = COLORS
+        self,
+        screen: pygame.Surface,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        font: pygame.font.Font,
+        text: str,
+        on_click: Callable,
+        color: dict = COLORS,
     ) -> None:
         """
         Create a button.
@@ -76,8 +83,9 @@ class Button:
         else:
             state = "normal"
         pygame.draw.rect(self.screen, self.color[state], self.rect)
-        self.screen.blit(self.label, self.label.get_rect(
-                        center=self.rect.center))
+        self.screen.blit(
+            self.label, self.label.get_rect(center=self.rect.center)
+        )
 
 
 class Game:
@@ -93,7 +101,8 @@ class Game:
     CHCOLORS = {
         "normal": (255, 0, 0),
         "hover": "#631616",
-        "pressed": "#2B1B1B"}
+        "pressed": "#2B1B1B",
+    }
 
     def __init__(self, game_state: GameState, config: dict) -> None:
         """
@@ -118,8 +127,8 @@ class Game:
 
     @staticmethod
     def images(
-                path: str,
-                size: tuple[int, int] | None = None) -> pygame.Surface:
+        path: str, size: tuple[int, int] | None = None
+    ) -> pygame.Surface:
         """
         Load an image with transparency, optionaly scaled.
 
@@ -140,9 +149,15 @@ class Game:
         self.logo = self.images(resource_path("./img/pacmanlogo"), (350, 150))
         self.menu_bg = self.images(resource_path("img/pause_back.jpg"), window)
         self.pause_bg = self.images(resource_path("img/pause.png"), (500, 150))
-        self.pause_bg2 = self.images(resource_path("img/pause_back2.jpg"), window)
-        self.instructions = self.images(resource_path("img/Instructions.png"), window)
-        self.cheat_bg = self.images(resource_path("img/cheat_screen.png"), window)
+        self.pause_bg2 = self.images(
+            resource_path("img/pause_back2.jpg"), window
+        )
+        self.instructions = self.images(
+            resource_path("img/Instructions.png"), window
+        )
+        self.cheat_bg = self.images(
+            resource_path("img/cheat_screen.png"), window
+        )
         self.pac_images = [
             self.images(resource_path(f"img/{name}"), (14, 14))
             for name in (
@@ -188,7 +203,7 @@ class Game:
                         100,
                         font,
                         "Start Game",
-                        self.new_game
+                        self.new_game,
                     ),
                     Button(
                         screen,
@@ -212,7 +227,14 @@ class Game:
                     ),
                     Button(
                         screen,
-                        450, 525, 300, 100, font, "QUIT GAME", self.quit),
+                        450,
+                        525,
+                        300,
+                        100,
+                        font,
+                        "QUIT GAME",
+                        self.quit,
+                    ),
                 ],
                 images=[(self.logo, (420, 5))],
             ),
@@ -224,7 +246,14 @@ class Game:
                 [
                     Button(
                         screen,
-                        640, 15, 100, 30, font, "Pause", self.switch("pause")),
+                        640,
+                        15,
+                        100,
+                        30,
+                        font,
+                        "Pause",
+                        self.switch("pause"),
+                    ),
                 ],
                 game_state=self.game_state,
             ),
@@ -235,12 +264,17 @@ class Game:
                 [
                     Button(
                         screen,
-                        700, 360, 150, 50, font,
-                        "Resume", self.switch("playing")
+                        700,
+                        360,
+                        150,
+                        50,
+                        font,
+                        "Resume",
+                        self.switch("playing"),
                     ),
                     Button(
-                        screen,
-                        540, 460, 200, 50, font, "Quit Game", self.quit),
+                        screen, 540, 460, 200, 50, font, "Quit Game", self.quit
+                    ),
                     Button(
                         screen,
                         390,
@@ -306,7 +340,13 @@ class Game:
                 [
                     Button(
                         screen,
-                        340, 380, 230, 50, font, "Play Again", self.new_game
+                        340,
+                        380,
+                        230,
+                        50,
+                        font,
+                        "Play Again",
+                        self.new_game,
                     ),
                     Button(
                         screen,

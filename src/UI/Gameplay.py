@@ -82,11 +82,18 @@ class Gameplay:
         self.frozen: bool = False
         self.get_time: float = 0.0
         self.ghost_img: dict = {
-            "red": pygame.image.load(resource_path("img/ghost.png")).convert_alpha(),
-            "pink": pygame.image.load(resource_path("img/pink_ghost.png")).convert_alpha(),
+            "red": pygame.image.load(
+                resource_path("img/ghost.png")
+            ).convert_alpha(),
+            "pink": pygame.image.load(
+                resource_path("img/pink_ghost.png")
+            ).convert_alpha(),
             "yellow": pygame.image.load(
-                resource_path("img/yellow_ghost.png")).convert_alpha(),
-            "green": pygame.image.load(resource_path("img/green_ghost.png")).convert_alpha(),
+                resource_path("img/yellow_ghost.png")
+            ).convert_alpha(),
+            "green": pygame.image.load(
+                resource_path("img/green_ghost.png")
+            ).convert_alpha(),
         }
         self.reset()
 
@@ -111,9 +118,8 @@ class Gameplay:
         level = self.config["level"][self.level_index]
         if self.level_index == 0:
             maze = load_maze(
-                        level["width"],
-                        level["height"],
-                        self.config["seed"])
+                level["width"], level["height"], self.config["seed"]
+            )
         else:
             maze = load_maze(level["width"], level["height"], -1)
         self.maze_grid = maze["maze"]
@@ -162,8 +168,9 @@ class Gameplay:
         self.ghosts_list = [self.ghost, self.ghost2, self.ghost3, self.ghost4]
         self.ghost_last_move: float = 0.0
         self.time_left = self.config["level_max_time"]
-        self.cell_size = min(width // level["width"], (
-            hieght - 400) // level["height"])
+        self.cell_size = min(
+            width // level["width"], (hieght - 400) // level["height"]
+        )
         self.offset_x = (width - len(self.maze_grid[0]) * self.cell_size) // 2
         self.offset_y = (hieght - len(self.maze_grid) * self.cell_size) // 2
         self.last_move: float = 0.0
@@ -176,8 +183,15 @@ class Gameplay:
             (0, maze["height"] - 1),
             (maze["width"] - 1, maze["height"] - 1),
         }
+        midx = len(self.maze_grid[0]) // 2
+        midy = len(self.maze_grid) // 2
+        safe_x, safe_y = self.find_open_cell(midx, midy)
         self.pacgums = self.game_state.place_pacgums(
-            maze["width"], maze["height"], maze["maze"], self.config["pacgum"]
+            maze["width"],
+            maze["height"],
+            maze["maze"],
+            self.config["pacgum"],
+            (safe_x, safe_y),
         )
         self.super_pacgums = self.game_state.place_super_pacgums(
             maze["width"], maze["height"]
@@ -203,8 +217,9 @@ class Gameplay:
                 return (curr_x, curr_y)
             for dx, dy in [(0, -1), (-1, 0), (1, 0), (0, 1)]:
                 nx, ny = curr_x + dx, curr_y + dy
-                if (0 <= nx < len(self.maze_grid[0]) and
-                        0 <= ny < len(self.maze_grid)):
+                if 0 <= nx < len(self.maze_grid[0]) and 0 <= ny < len(
+                    self.maze_grid
+                ):
                     if (nx, ny) not in visited:
                         # print(visited)
                         visited.add((nx, ny))
@@ -222,8 +237,9 @@ class Gameplay:
                     ghost.respawn_until = int(now) + ghost.respawn_duration
                 elif now >= ghost.respawn_until:
                     ghost.respawn()
-            elif (ghost.state == GhostStates.SCARED and
-                    now >= ghost.scared_until):
+            elif (
+                ghost.state == GhostStates.SCARED and now >= ghost.scared_until
+            ):
                 ghost.state = GhostStates.CHASE
 
     def reset_after_death(self) -> None:
@@ -243,9 +259,8 @@ class Gameplay:
         self.player.old_x, self.player.old_y = safe_x, safe_y
 
     def update(
-            self,
-            events: list[pygame.event.Event],
-            dt: float) -> str | None:
+        self, events: list[pygame.event.Event], dt: float
+    ) -> str | None:
         """
         Advance the game by one frame.
 
@@ -382,8 +397,10 @@ class Gameplay:
         Returns:
             (top, left) pixel cirrdubates including the maze offset.
         """
-        return (self.offset_x + x * self.cell_size,
-                self.offset_y + y * self.cell_size)
+        return (
+            self.offset_x + x * self.cell_size,
+            self.offset_y + y * self.cell_size,
+        )
 
     def center_cell(self, x: int, y: int) -> tuple[int, int]:
         """Rturn the center screen pixel of a maze cell.
@@ -410,13 +427,15 @@ class Gameplay:
             button.draw()
 
     def cheat_mode(
-                self,
-                events: list[pygame.event.Event] | None = None) -> bool:
+        self, events: list[pygame.event.Event] | None = None
+    ) -> bool:
         """Apply the cheat bound to a pressed key"""
         if events:
             for event in events:
-                if (event.type != pygame.KEYDOWN or not
-                        event.mod & pygame.KMOD_SHIFT):
+                if (
+                    event.type != pygame.KEYDOWN
+                    or not event.mod & pygame.KMOD_SHIFT
+                ):
                     continue
                 if event.key == pygame.K_l:
                     self.player.lives += 1
@@ -444,16 +463,20 @@ class Gameplay:
                 left, top = self.origin_cell(x, y)
                 right, bottom = left + self.cell_size, top + self.cell_size
                 if cell & 1:
-                    pygame.draw.line(self.screen, "white", (left, top), (
-                            right, top), 1)
+                    pygame.draw.line(
+                        self.screen, "white", (left, top), (right, top), 1
+                    )
                 if cell & 2:
                     pygame.draw.line(
                         self.screen, "white", (right, top), (right, bottom), 1
                     )
                 if cell & 4:
                     pygame.draw.line(
-                        self.screen, "white", (left, bottom), (
-                                right, bottom), 1
+                        self.screen,
+                        "white",
+                        (left, bottom),
+                        (right, bottom),
+                        1,
                     )
                 if cell & 8:
                     pygame.draw.line(
@@ -473,8 +496,8 @@ class Gameplay:
         lerp_x = old_center[0] + (new_center[0] - old_center[0]) * t
         lerp_y = old_center[1] + (new_center[1] - old_center[1]) * t
         scaled_img = pygame.transform.scale(
-                self.current_image,
-                (self.cell_size / 2, self.cell_size / 2))
+            self.current_image, (self.cell_size / 2, self.cell_size / 2)
+        )
         img = pygame.transform.rotate(
             scaled_img, self.DIRE[self.player.direction]
         )
@@ -486,8 +509,8 @@ class Gameplay:
             if ghost.state == GhostStates.EATEN:
                 continue
             ghost_img = pygame.transform.scale(
-                self.ghost_img[ghost.color], (
-                        self.cell_size / 2, self.cell_size / 2)
+                self.ghost_img[ghost.color],
+                (self.cell_size / 2, self.cell_size / 2),
             )
             center = self.center_cell(ghost.x, ghost.y)
             self.screen.blit(ghost_img, ghost_img.get_rect(center=center))
@@ -500,8 +523,8 @@ class Gameplay:
             f"scores: {self.player.score}",
             f"time_left: {self.time_left:.1f}",
             f"level: {self.level_index + 1}",
-            f"cheat: {" ".join(self.active_cheats())}",
-            f"Ghost_state: {" ".join(self.active_states())}",
+            f"cheat: {' '.join(self.active_cheats())}",
+            f"Ghost_state: {' '.join(self.active_states())}",
         ]
         for i, text in enumerate(lines):
             surface = self.font.render(text, True, (255, 255, 255))
@@ -548,8 +571,13 @@ class Name_entry:
     """
 
     def __init__(
-                self, screen: pygame.Surface, font: pygame.font.Font,
-                score: int, config: dict, buttons: list) -> None:
+        self,
+        screen: pygame.Surface,
+        font: pygame.font.Font,
+        score: int,
+        config: dict,
+        buttons: list,
+    ) -> None:
         """
         Create the name entry screen.
 
@@ -567,8 +595,8 @@ class Name_entry:
         self.button: list = buttons
 
     def update(
-                self, events: list[pygame.event.Event],
-                dt: float) -> str | None:
+        self, events: list[pygame.event.Event], dt: float
+    ) -> str | None:
         """
         Handle typing and saving.
 
@@ -596,12 +624,13 @@ class Name_entry:
                             self.player_name = "Player"
                         name_entry = {
                             "name": self.player_name,
-                            "score": self.score}
+                            "score": self.score,
+                        }
                         highscores = []
                         if os.path.exists(
                             self.config.get(
-                                "highscore_filename",
-                                "highscores.json")
+                                "highscore_filename", "highscores.json"
+                            )
                         ):
                             if (
                                 os.path.getsize(
@@ -628,22 +657,25 @@ class Name_entry:
                         highscores = valid_data
                         highscores.append(name_entry)
                         highscores = sorted(
-                            highscores, key=lambda item: item["score"],
-                            reverse=True
+                            highscores,
+                            key=lambda item: item["score"],
+                            reverse=True,
                         )
                         highscores = highscores[:10]
                         with open(
                             self.config.get(
-                                "highscore_filename",
-                                "highscores.json"),
-                                "w",
+                                "highscore_filename", "highscores.json"
+                            ),
+                            "w",
                         ) as f:
                             json.dump(highscores, f, indent=4)
                         self.player_name = ""
                         return "highscores"
                     else:
-                        if (event.unicode.isalnum() and
-                                len(self.player_name) < 10):
+                        if (
+                            event.unicode.isalnum()
+                            and len(self.player_name) < 10
+                        ):
                             self.player_name += event.unicode
         except (JSONDecodeError, PermissionError) as e:
             print({e})
@@ -653,8 +685,8 @@ class Name_entry:
         """Draw the prompt, the achieved score and name input box."""
         self.screen.fill((28, 28, 28))
         display_text = self.config.get(
-            "end_game",
-            "Enter you name to save your score")
+            "end_game", "Enter you name to save your score"
+        )
         Game_over = self.font.render(
             display_text,
             True,
@@ -665,8 +697,9 @@ class Name_entry:
         score_rect = score_sur.get_rect(center=(1280 // 2, 300))
 
         rect = text_sur.get_rect(center=(1280 // 2, 720 // 2))
-        rect_rect = pygame.Surface((250, 50)).get_rect(center=(
-                    1280 // 2, 720 // 2))
+        rect_rect = pygame.Surface((250, 50)).get_rect(
+            center=(1280 // 2, 720 // 2)
+        )
         game_rect = Game_over.get_rect(center=(1280 // 2, 70))
         pygame.draw.rect(self.screen, "white", rect_rect)
         self.screen.blit(text_sur, rect)
@@ -680,9 +713,12 @@ class HighScoreScreen:
     """Screen displaying the top 10 saved scores."""
 
     def __init__(
-                self,
-                screen: pygame.Surface, font: pygame.font.Font,
-                config: dict, buttons: list) -> None:
+        self,
+        screen: pygame.Surface,
+        font: pygame.font.Font,
+        config: dict,
+        buttons: list,
+    ) -> None:
         """Create the highscore screen.
 
         Args:
@@ -706,14 +742,14 @@ class HighScoreScreen:
         """
         try:
             validating_data = []
-            if os.path.exists(self.config.get(
-                        "highscore_filename",
-                        "highscores.json")):
+            if os.path.exists(
+                self.config.get("highscore_filename", "highscores.json")
+            ):
                 if (
                     os.path.getsize(
                         self.config.get(
-                            "highscore_filename",
-                            "highscores.json")
+                            "highscore_filename", "highscores.json"
+                        )
                     )
                     // 1024
                     > 100
@@ -721,10 +757,8 @@ class HighScoreScreen:
                     print("FILE TOO BIG")
                     return
                 with open(
-                    self.config.get(
-                        "highscore_filename",
-                        "highscores.json"),
-                        "r"
+                    self.config.get("highscore_filename", "highscores.json"),
+                    "r",
                 ) as f:
                     validating_data = json.load(f)
             if not isinstance(validating_data, list):
@@ -766,9 +800,8 @@ class HighScoreScreen:
         return valid_data
 
     def update(
-                self,
-                events: list[pygame.event.Event],
-                dt: float) -> str | None:
+        self, events: list[pygame.event.Event], dt: float
+    ) -> str | None:
         """
         Forward events to the buttons.
 
@@ -796,7 +829,7 @@ class HighScoreScreen:
         starting_y = 200
         spacing = 40
         for i, entery in enumerate(self.scores_data):
-            text = f"{i + 1}. {entery["name"]}: {entery["score"]} pts"
+            text = f"{i + 1}. {entery['name']}: {entery['score']} pts"
             text_surf = self.font.render(text, True, "White")
             rect = text_surf.get_rect(center=(1280 // 2, starting_y))
             self.screen.blit(text_surf, rect)

@@ -192,6 +192,7 @@ class Ghost(Entity):
         return neighbors
 
     def respawn(self) -> None:
+        """Reset the ghost to its starting corner and transition it to the chase state."""
         self.x, self.y = self._get_corner()
         self.state = GhostStates.CHASE
         self.respawn_until = 0
